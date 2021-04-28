@@ -127,3 +127,14 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+.idea
+
+runs/
+
+weights/epoch*
+sample
+weights
+
+datasets
+IR-MNN/quantize/images
