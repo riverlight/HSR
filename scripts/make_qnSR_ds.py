@@ -47,5 +47,5 @@ def make_h5(dir, h5name, interval=0):
 
 if __name__=="__main__":
     print("Hi, this is SR qn-dataset generator program")
-    make_h5(train_dir, train_h5, interval=3)
-    make_h5(eval_dir, eval_h5, interval=1)
+    make_h5(train_dir, train_h5, interval=0)
+    make_h5(eval_dir, eval_h5, interval=0)
