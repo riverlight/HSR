@@ -16,14 +16,14 @@ def main():
     train_file = "./qn_dataset/train.h5"
     eval_file = "./qn_dataset/eval.h5"
     outputs_dir = "./weights/"
-    lr = 1e-4
+    lr = 3e-5
     batch_size = 24
     num_epochs = 400
     num_workers = 8
     seed = 1108
-    # best_weights = None
-    best_weights = "./weights/hsi_epoch_65.pth"
-    start_epoch = 66
+    best_weights = None
+    best_weights = "./weights/hsi_epoch_205.pth"
+    start_epoch = 206
 
     if not os.path.exists(outputs_dir):
         os.makedirs(outputs_dir)
@@ -34,7 +34,8 @@ def main():
         model = t.load(best_weights)
     else:
         model = HRcanNet().to(device)
-    criterion = nn.MSELoss()
+    # criterion = nn.MSELoss()
+    criterion = nn.L1Loss()
     optimizer = optim.Adam(params=model.parameters(), lr=lr)
     train_dataset = QNDataset(train_file)
     train_dataloader = DataLoader(dataset=train_dataset,

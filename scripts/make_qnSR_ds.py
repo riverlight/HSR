@@ -13,6 +13,10 @@ train_h5 = "../qn_dataset/train.h5"
 eval_dir = "D:\\workroom\\tools\\dataset\\SR\\qnSR_DS\\eval"
 eval_h5 = "../qn_dataset/eval.h5"
 
+# train_dir = "D:\\workroom\\tools\\dataset\\SR\\srgan\\Set14"
+# train_dir = "D:\\workroom\\tools\\dataset\\SR\\T91-image\\T91\\T91"
+# train_h5 = "../qn_dataset/T91.h5"
+
 def make_h5(dir, h5name, interval=0):
     h5_file = h5py.File(h5name, 'w')
     hr_patchs = list()
@@ -28,7 +32,7 @@ def make_h5(dir, h5name, interval=0):
         # print(hr_img.shape)
         lr_img = cv2.resize(hr_img, (hr_img.shape[1]//2, hr_img.shape[0]//2))
         # print(lr_img.shape)
-        ret, lr_buf = cv2.imencode(".JPG", lr_img, [int(cv2.IMWRITE_JPEG_QUALITY), 90])
+        ret, lr_buf = cv2.imencode(".png", lr_img)
         lr_img = cv2.imdecode(lr_buf, 1)
         hr_img = hr_img.transpose(2, 0, 1)
         lr_img = lr_img.transpose(2, 0, 1)

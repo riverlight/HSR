@@ -15,20 +15,26 @@ def psnr1(img1, img2):
       return 100
    return 10 * math.log10(255.0**2/mse)
 
+
 def calc_psnr_file_upsample(img1, img2):
     np1 = cv2.imread(img1)
     np2 = cv2.imread(img2)
+    return calc_psnr_np_upsample(np1, np2)
+
+
+def calc_psnr_np_upsample(np1, np2):
     h1, w1, _ = np1.shape
     h2, w2, _ = np2.shape
-    if h1==h2 and w1==w2:
+    if h1 == h2 and w1 == w2:
         pass
-    elif h1*w1 < h2*w2:
+    elif h1 * w1 < h2 * w2:
         np1 = cv2.resize(np1, (w2, h2), interpolation=cv2.INTER_CUBIC)
     else:
         np2 = cv2.resize(np2, (w1, h1), interpolation=cv2.INTER_CUBIC)
 
     psnr = calc_psnr_array(np1, np2)
     return psnr
+
 
 def calc_psnr_file(img1, img2):
     np1 = cv2.imread(img1)
