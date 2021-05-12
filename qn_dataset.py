@@ -51,5 +51,5 @@ def calc_ds_psnr():
 
 
 if __name__ == "__main__":
-    # test()
-    calc_ds_psnr()
+    test()
+    # calc_ds_psnr()

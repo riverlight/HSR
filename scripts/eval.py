@@ -60,21 +60,22 @@ def eval_psnr():
     # dir0 = "D:\\workroom\\tools\\dataset\\SR\\Set5\\image_SRF_2\\"
     # dir1 = "D:\\workroom\\tools\\dataset\\SR\\Set5\\image_SRF_2\\"
 
-    lr_file = dir1 + "motor-lr.jpg"
-    hr_file = dir0 + 'motor.jpg'
+    lr_file = dir1 + "film-comic-lr.png"
+    hr_file = dir0 + 'film-comic.png'
     hsi_file = eval_image(lr_file=lr_file)
     psnr = h_psnr.calc_psnr_file(hr_file, hsi_file)
     print(psnr)
 
-    lst_file = [dir1 + "motor-bd.jpg"]
+    lst_file = [dir1 + "film-comic-bd.jpg"]
     for file in lst_file:
         psnr = h_psnr.calc_psnr_file(hr_file, file)
         print(psnr)
 
 
 def eval_cmp_bic_hsi_dir():
-    dir = "D:\\workroom\\tools\\dataset\\SR\\srgan\\bsd100"
-    dir = "D:\\workroom\\tools\\dataset\\SR\\SI"
+    dir = "D:\\workroom\\tools\\dataset\\SR\\srgan\\BSD100"
+    dir = "D:\\workroom\\tools\\dataset\\SR\\qnSR_DS\\eval"
+    # dir = "D:\\workroom\\tools\\dataset\\SR\\SI"
     lst_bic = list()
     lst_hsi = list()
     for count, name in enumerate(os.listdir(dir)):
@@ -100,5 +101,5 @@ def eval_cmp_bic_hsi(imagefile):
 
 
 if __name__=="__main__":
-    eval_psnr()
-    # eval_cmp_bic_hsi_dir()
+    # eval_psnr()
+    eval_cmp_bic_hsi_dir()

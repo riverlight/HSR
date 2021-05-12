@@ -5,6 +5,22 @@ import torch.nn as nn
 import math
 import numpy as np
 import imageio
+import random
+
+
+def augment(l, hflip=True, rot=True):
+    hflip = hflip and random.random() < 0.5
+    vflip = rot and random.random() < 0.5
+    rot90 = rot and random.random() < 0.5
+
+    def _augment(img):
+        if hflip: img = np.flip(img, axis=2)
+        if vflip: img = np.flip(img, axis=1)
+        if rot90: img = img.transpose(0, 2, 1)
+
+        return img
+
+    return [_augment(_l) for _l in l]
 
 
 def default_conv(in_channels, out_channels, kernel_size, bias=True):

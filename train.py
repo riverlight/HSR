@@ -22,8 +22,8 @@ def main():
     num_workers = 8
     seed = 1108
     best_weights = None
-    best_weights = "./weights/hsi_epoch_205.pth"
-    start_epoch = 206
+    best_weights = "./weights/hsi_epoch_62.pth"
+    start_epoch = 63
 
     if not os.path.exists(outputs_dir):
         os.makedirs(outputs_dir)
