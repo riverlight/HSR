@@ -23,7 +23,7 @@ class QNDataset(Dataset):
 
 
 def test():
-    ds = QNDataset(".\\qn_dataset\\train.h5")
+    ds = QNDataset(".\\qn_dataset\\train_kg.h5")
     dl = DataLoader(dataset=ds, batch_size=1)
     for data in dl:
         hr_img, lr_img = data

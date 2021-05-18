@@ -12,7 +12,7 @@ import time
 
 
 class CSISR:
-    def __init__(self, weights_file="../weights/hsi_best_33.pth"):
+    def __init__(self, weights_file="../weights/hsi_best_hrcan55.pth"):
         self._device = 'cuda'
         # self._net = HSISRNet().to(self._device)
         self._net = t.load(weights_file).to(self._device)

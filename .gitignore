@@ -138,3 +138,5 @@ sample
 
 datasets
 IR-MNN/quantize/images
+log/
+weights/*epoch*.pth
