@@ -140,3 +140,4 @@ datasets
 IR-MNN/quantize/images
 log/
 weights/*epoch*.pth
+qn_dataset/*.h5

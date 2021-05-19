@@ -7,6 +7,7 @@
 #include <memory>
 
 using namespace std;
+using namespace cv;
 
 
 torch::jit::script::Module load_model(string model_path)
@@ -26,7 +27,7 @@ torch::jit::script::Module load_model(string model_path)
     return module;
 }
 
-torch::Tensor sisr(torch::jit::script::Module module, torch::Tensor img_tensor)
+torch::Tensor inference(torch::jit::script::Module module, torch::Tensor img_tensor)
 {
     std::vector<torch::jit::IValue> inputs;
     torch::Tensor out;
@@ -66,10 +67,10 @@ cv::Mat torchTensortoCVMat(torch::Tensor& tensor)
 }
 
 
-int main(int argc, const char* argv[]) 
+int sr_image()
 {
     //载入模型
-    string weight_path = "D:/workroom/project/riverlight/HSR/weights/hsi_best.pt";
+    string weight_path = "D:/workroom/project/riverlight/HSR/weights/BSRGANx2.pt";
     torch::jit::script::Module module = load_model(weight_path);
 
     //输入图像
@@ -89,7 +90,7 @@ int main(int argc, const char* argv[])
     for (int i = 0; i < num; i++)
     {
         t = (double)cv::getTickCount();
-        auto pred = sisr(module, img_tensor);
+        auto pred = inference(module, img_tensor);
         cout << "out shape : " << pred.sizes() << endl;
         t = (double)cv::getTickCount() - t;
         printf("单张耗费时间为:  %gs\n", t / cv::getTickFrequency());
@@ -106,6 +107,47 @@ int main(int argc, const char* argv[])
     printf("每秒:  %g 张 \n", num * cv::getTickFrequency() / t0);
 
     std::cout << "ok\n";
+
+    return 0;
+}
+
+int sr_video()
+{
+    VideoCapture cap("d:/workroom/testroom/xgm_lr.mp4");
+    VideoWriter write;
+    write.open("d:/workroom/testroom/xgm_bsrgan.avi", /*CAP_OPENCV_MJPEG*/ VideoWriter::fourcc('I', '4', '2', '0'),
+        cap.get(cv::CAP_PROP_FPS), Size(cap.get(cv::CAP_PROP_FRAME_WIDTH)*2, cap.get(cv::CAP_PROP_FRAME_HEIGHT)*2));
+
+    //载入模型
+    string weight_path = "D:/workroom/project/riverlight/HSR/weights/BSRGANx2.pt";
+    torch::jit::script::Module module = load_model(weight_path);
+
+    while (1) {
+        Mat frame;
+        cap >> frame;
+        if (frame.empty())
+            break;
+
+        auto img_tensor = img2tensor(frame);
+        auto pred = inference(module, img_tensor);
+        cv::Mat out_img = torchTensortoCVMat(pred);
+
+        write << out_img;
+        cout << cap.get(CAP_PROP_POS_MSEC) << endl;
+    }
+    cap.release();
+    write.release();
+
+    cout << "done" << endl;
+
+    return 0;
+}
+
+
+int main(int argc, const char* argv[]) 
+{
+    //sr_image();
+    sr_video();
 
     return 0;
 }

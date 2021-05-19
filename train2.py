@@ -2,7 +2,7 @@
 
 from qn_dataset import QNDataset
 from torch.utils.data.dataloader import DataLoader
-from models import HSISRNet, HRcanNet
+from models2 import HRcanRRDBNet
 import os
 import torch.optim as optim
 from tqdm import tqdm
@@ -16,14 +16,14 @@ def main():
     train_file = "./qn_dataset/train.h5"
     eval_file = "./qn_dataset/eval.h5"
     outputs_dir = "./weights/"
-    lr = 1e-5
+    lr = 1e-4
     batch_size = 24
     num_epochs = 400
     num_workers = 8
     seed = 1108
-    # best_weights = None
-    best_weights = "./weights/hsi_epoch_83.pth"
-    start_epoch = 84
+    best_weights = None
+    # best_weights = "./weights/hsi2_epoch_83.pth"
+    start_epoch = 0
 
     if not os.path.exists(outputs_dir):
         os.makedirs(outputs_dir)
@@ -33,7 +33,7 @@ def main():
     if best_weights is not None:
         model = t.load(best_weights)
     else:
-        model = HRcanNet().to(device)
+        model = HRcanRRDBNet().to(device)
     # criterion = nn.MSELoss()
     criterion = nn.L1Loss()
     optimizer = optim.Adam(params=model.parameters(), lr=lr)
@@ -89,7 +89,7 @@ def main():
         if epoch_psnr.avg > best_psnr:
             best_epoch = epoch
             best_psnr = epoch_psnr.avg
-            t.save(model, os.path.join(outputs_dir, 'hsi_best.pth'))
+            t.save(model, os.path.join(outputs_dir, 'hsi2_best.pth'))
 
     print('best epoch: {}, psnr: {:.2f}'.format(best_epoch, best_psnr))
 

@@ -1,0 +1,5 @@
+http://test-v.oss-cn-shanghai.aliyuncs.com/hypnos-blueprint/eval.h5
+http://test-v.oss-cn-shanghai.aliyuncs.com/hypnos-blueprint/Set5.h5
+http://test-v.oss-cn-shanghai.aliyuncs.com/hypnos-blueprint/Set14.h5
+http://test-v.oss-cn-shanghai.aliyuncs.com/hypnos-blueprint/T91.h5
+http://test-v.oss-cn-shanghai.aliyuncs.com/hypnos-blueprint/train.h5
