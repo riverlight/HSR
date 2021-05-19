@@ -17,7 +17,10 @@ def main():
     eval_file = "./qn_dataset/eval.h5"
     outputs_dir = "./weights/"
     lr = 1e-4
-    batch_size = 24
+    if t.cuda.device_count() > 1:
+        batch_size = 240
+    else:
+        batch_size = 24
     num_epochs = 400
     num_workers = 8
     seed = 1108
