@@ -34,6 +34,9 @@ def main():
         model = t.load(best_weights)
     else:
         model = HRcanRRDBNet().to(device)
+    if t.cuda.device_count() > 1:
+        print("Let's use", t.cuda.device_count(), "GPUs!")
+        model = nn.DataParallel(model)
     # criterion = nn.MSELoss()
     criterion = nn.L1Loss()
     optimizer = optim.Adam(params=model.parameters(), lr=lr)
