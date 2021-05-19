@@ -17,12 +17,13 @@ def main():
         use_gpus = True
     else:
         use_gpus = False
+    use_gpus = False
     train_file = "./qn_dataset/train.h5"
     eval_file = "./qn_dataset/eval.h5"
     outputs_dir = "./weights/"
     lr = 1e-4
     if use_gpus:
-        batch_size = 240
+        batch_size = 24
     else:
         batch_size = 8
     num_epochs = 400
