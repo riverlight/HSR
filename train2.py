@@ -44,6 +44,7 @@ def main():
     if use_gpus:
         print("Let's use", t.cuda.device_count(), "GPUs!")
         model = nn.DataParallel(model)
+        model.to(device)
         optimizer = optim.Adam(params=model.module.parameters(), lr=lr)
     else:
         optimizer = optim.Adam(params=model.parameters(), lr=lr)
