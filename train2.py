@@ -13,11 +13,15 @@ from utils import AverageMeter, calc_psnr
 
 
 def main():
+    if t.cuda.device_count() > 1:
+        use_gpus = True
+    else:
+        use_gpus = False
     train_file = "./qn_dataset/train.h5"
     eval_file = "./qn_dataset/eval.h5"
     outputs_dir = "./weights/"
     lr = 1e-4
-    if t.cuda.device_count() > 1:
+    if use_gpus:
         batch_size = 240
     else:
         batch_size = 24
@@ -37,7 +41,7 @@ def main():
         model = t.load(best_weights)
     else:
         model = HRcanRRDBNet().to(device)
-    if t.cuda.device_count() > 1:
+    if use_gpus:
         print("Let's use", t.cuda.device_count(), "GPUs!")
         model = nn.DataParallel(model)
         optimizer = optim.Adam(params=model.module.parameters(), lr=lr)
@@ -60,7 +64,7 @@ def main():
     best_psnr = 0.0
     for epoch in range(num_epochs - start_epoch):
         epoch += start_epoch
-        if t.cuda.device_count() > 1:
+        if use_gpus:
             model.module.train()
         else:
             model.train()
@@ -82,7 +86,7 @@ def main():
                 tq.update(len(hr_img))
                 print(i, epoch_losses.avg)
 
-        if t.cuda.device_count() > 1:
+        if use_gpus:
             t.save(model.module, os.path.join(outputs_dir, 'hsi2_epoch_{}.pth'.format(epoch)))
             model.module.eval()
         else:
@@ -105,7 +109,7 @@ def main():
         if epoch_psnr.avg > best_psnr:
             best_epoch = epoch
             best_psnr = epoch_psnr.avg
-            if t.cuda.device_count() > 1:
+            if use_gpus:
                 t.save(model.module, os.path.join(outputs_dir, 'hsi2_best.pth'))
             else:
                 t.save(model, os.path.join(outputs_dir, 'hsi2_best.pth'))
