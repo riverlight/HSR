@@ -40,9 +40,12 @@ def main():
     if t.cuda.device_count() > 1:
         print("Let's use", t.cuda.device_count(), "GPUs!")
         model = nn.DataParallel(model)
+        optimizer = optim.Adam(params=model.module.parameters(), lr=lr)
+    else:
+        optimizer = optim.Adam(params=model.parameters(), lr=lr)
     # criterion = nn.MSELoss()
     criterion = nn.L1Loss()
-    optimizer = optim.Adam(params=model.parameters(), lr=lr)
+
     train_dataset = QNDataset(train_file)
     train_dataloader = DataLoader(dataset=train_dataset,
                                   batch_size=batch_size,
@@ -57,7 +60,10 @@ def main():
     best_psnr = 0.0
     for epoch in range(num_epochs - start_epoch):
         epoch += start_epoch
-        model.train()
+        if t.cuda.device_count() > 1:
+            model.module.train()
+        else:
+            model.train()
         epoch_losses = AverageMeter()
         with tqdm(total=(len(train_dataset) - len(train_dataset) % batch_size)) as tq:
             tq.set_description('epoch: {}/{}'.format(epoch, num_epochs - 1))
@@ -76,8 +82,12 @@ def main():
                 tq.update(len(hr_img))
                 print(i, epoch_losses.avg)
 
-        t.save(model, os.path.join(outputs_dir, 'hsi_epoch_{}.pth'.format(epoch)))
-        model.eval()
+        if t.cuda.device_count() > 1:
+            t.save(model.module, os.path.join(outputs_dir, 'hsi2_epoch_{}.pth'.format(epoch)))
+            model.module.eval()
+        else:
+            t.save(model, os.path.join(outputs_dir, 'hsi2_epoch_{}.pth'.format(epoch)))
+            model.eval()
 
         epoch_psnr = AverageMeter()
         for data in eval_dataloader:
@@ -95,7 +105,10 @@ def main():
         if epoch_psnr.avg > best_psnr:
             best_epoch = epoch
             best_psnr = epoch_psnr.avg
-            t.save(model, os.path.join(outputs_dir, 'hsi2_best.pth'))
+            if t.cuda.device_count() > 1:
+                t.save(model.module, os.path.join(outputs_dir, 'hsi2_best.pth'))
+            else:
+                t.save(model, os.path.join(outputs_dir, 'hsi2_best.pth'))
 
     print('best epoch: {}, psnr: {:.2f}'.format(best_epoch, best_psnr))
 
