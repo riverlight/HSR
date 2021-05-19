@@ -21,10 +21,7 @@ def main():
     eval_file = "./qn_dataset/eval.h5"
     outputs_dir = "./weights/"
     lr = 1e-4
-    if use_gpus:
-        batch_size = 240
-    else:
-        batch_size = 24
+    batch_size = 8
     num_epochs = 400
     num_workers = 8
     seed = 1108
@@ -45,11 +42,10 @@ def main():
         print("Let's use", t.cuda.device_count(), "GPUs!")
         model = nn.DataParallel(model)
         model.to(device)
-        optimizer = optim.Adam(params=model.module.parameters(), lr=lr)
-    else:
-        optimizer = optim.Adam(params=model.parameters(), lr=lr)
+
+    optimizer = optim.Adam(params=model.parameters(), lr=lr)
     # criterion = nn.MSELoss()
-    criterion = nn.L1Loss()
+    criterion = nn.L1Loss().to(device)
 
     train_dataset = QNDataset(train_file)
     train_dataloader = DataLoader(dataset=train_dataset,
@@ -75,8 +71,10 @@ def main():
 
             for i, data in enumerate(train_dataloader):
                 hr_img, lr_img = data
-                hr_img = hr_img.to(device)
-                lr_img = lr_img.to(device)
+                # hr_img = hr_img.to(device)
+                # lr_img = lr_img.to(device)
+                hr_img = hr_img.cuda()
+                lr_img = lr_img.cuda()
                 hsi_img = model(lr_img)
                 loss = criterion(hsi_img, hr_img)
                 epoch_losses.update(loss.item(), len(hr_img))
