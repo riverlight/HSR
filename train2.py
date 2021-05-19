@@ -21,7 +21,10 @@ def main():
     eval_file = "./qn_dataset/eval.h5"
     outputs_dir = "./weights/"
     lr = 1e-4
-    batch_size = 8
+    if use_gpus:
+        batch_size = 240
+    else:
+        batch_size = 8
     num_epochs = 400
     num_workers = 8
     seed = 1108
