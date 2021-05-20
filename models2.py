@@ -39,7 +39,7 @@ class HRcanRRDBNet(nn.Module):
         self.lrelu = nn.LeakyReLU(negative_slope=0.2, inplace=True)
 
     def forward(self, x):
-        bic_img = interpolate(x, scale_factor=self._scale, mode="bicubic", align_corners=False)
+        bic_img = interpolate(x, scale_factor=self._scaler, mode="bicubic", align_corners=False)
 
         fea = self._head(x)
         rcan = self._rcanbody(fea)
