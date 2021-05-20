@@ -23,9 +23,9 @@ def main():
     outputs_dir = "./weights/"
     lr = 1e-4
     if use_gpus:
-        batch_size = 24
+        batch_size = 24*4
     else:
-        batch_size = 8
+        batch_size = 24
     num_epochs = 400
     num_workers = 8
     seed = 1108
