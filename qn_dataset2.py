@@ -57,7 +57,7 @@ class qnSRDataset(data.Dataset):
                 len(self.paths_LQ), len(self.paths_GT))
         if cfgDict['noise']:
             self.noises = noiseDataset(cfgDict['noise_data'], cfgDict['patch_size'] / cfgDict['scale'])
-            print(len(self.noises))
+            # print(len(self.noises))
         self.random_scale_list = [1]
 
     def check_cfg(self, cfgDict):
@@ -100,7 +100,7 @@ class qnSRDataset(data.Dataset):
         img_LQ = img_LQ[rnd_h:rnd_h + LQ_size, rnd_w:rnd_w + LQ_size, :]
         rnd_h_GT, rnd_w_GT = int(rnd_h * scale), int(rnd_w * scale)
         img_GT = img_GT[rnd_h_GT:rnd_h_GT + GT_size, rnd_w_GT:rnd_w_GT + GT_size, :]
-        print(rnd_h, rnd_w,rnd_h_GT, rnd_w_GT)
+        # print(rnd_h, rnd_w,rnd_h_GT, rnd_w_GT)
 
         # augmentation - flip, rotate
         img_LQ, img_GT = hutils.augment([img_LQ, img_GT], True, True)
@@ -114,7 +114,7 @@ class qnSRDataset(data.Dataset):
 
         # noise injection
         if self.cfgDict['noise']:
-            print(len(self.noises))
+            # print(len(self.noises))
             norm_noise, _ = self.noises[np.random.randint(0, len(self.noises))]
             img_LQ = torch.clamp(img_LQ + norm_noise, 0, 1)
 
