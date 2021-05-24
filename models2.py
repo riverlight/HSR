@@ -44,8 +44,8 @@ class HRcanRRDBNet(nn.Module):
         fea = self._head(x)
         rcan = self._rcanbody(fea)
         trunk = self._trunk_conv(self._rcanbody2(self._RRDB_trunk(rcan)))
-        fea = fea + trunk
-
+        # fea = fea + trunk
+        fea = fea
         fea = self.lrelu(self.upconv1(fea))
         out = self.upconv3(self.upconv2(fea))
         out += bic_img
