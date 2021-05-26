@@ -9,6 +9,7 @@ import cv2
 import hutils
 import random
 import numpy as np
+import h5py
 
 
 class noiseDataset(data.Dataset):
@@ -36,6 +37,65 @@ class noiseDataset(data.Dataset):
 
     def __len__(self):
         return len(self.noise_imgs)
+
+
+class qnSRDataset2(data.Dataset):
+    def __init__(self, h5file, noise_dir=None):
+        super(qnSRDataset2, self).__init__()
+        self.patch_size = 96
+        self.scale = 2
+        self.h5_file = h5file
+        if noise_dir:
+            self.noises = noiseDataset(noise_dir, self.patch_size / self.scale)
+        else:
+            self.noises = None
+
+    def __getitem__(self, idx):
+        with h5py.File(self.h5_file, 'r') as f:
+            img_GT = f['hr'][idx].astype(np.float32)/255
+        img_GT = np.transpose(img_GT, [1, 2, 0])
+        print(img_GT.shape)
+        img_LQ = hutils.imresize_np(img_GT, 1 / self.scale, True)
+
+
+        H, W, C = img_LQ.shape
+        LQ_size = self.patch_size // self.scale
+
+        # randomly crop
+        rnd_h = random.randint(0, max(0, H - LQ_size))
+        rnd_w = random.randint(0, max(0, W - LQ_size))
+        img_LQ = img_LQ[rnd_h:rnd_h + LQ_size, rnd_w:rnd_w + LQ_size, :]
+        rnd_h_GT, rnd_w_GT = int(rnd_h * self.scale), int(rnd_w * self.scale)
+        img_GT = img_GT[rnd_h_GT:rnd_h_GT + self.patch_size, rnd_w_GT:rnd_w_GT + self.patch_size, :]
+        # print(rnd_h, rnd_w,rnd_h_GT, rnd_w_GT)
+
+        # augmentation - flip, rotate
+        img_LQ, img_GT = hutils.augment([img_LQ, img_GT], True, True)
+
+        # BGR to RGB, HWC to CHW, numpy to tensor
+        if img_GT.shape[2] == 3:
+            img_GT = img_GT[:, :, [2, 1, 0]]
+            img_LQ = img_LQ[:, :, [2, 1, 0]]
+        img_GT = torch.from_numpy(np.ascontiguousarray(np.transpose(img_GT, (2, 0, 1)))).float()
+        img_LQ = torch.from_numpy(np.ascontiguousarray(np.transpose(img_LQ, (2, 0, 1)))).float()
+
+        # noise injection
+        if self.noises:
+            # print(len(self.noises))
+            norm_noise, _ = self.noises[np.random.randint(0, len(self.noises))]
+            img_LQ = torch.clamp(img_LQ + norm_noise, 0, 1)
+
+        # cv2.imshow("1", np.transpose(img_GT.numpy(), (2, 1, 0)))
+        # cv2.imshow("2", np.transpose(img_LQ.numpy(), (2, 1, 0)))
+        # cv2.waitKey()
+        # exit(0)
+        return {'LQ': img_LQ, 'GT': img_GT}
+
+
+    def __len__(self):
+        with h5py.File(self.h5_file, 'r') as f:
+            return len(f['hr'])
+
 
 
 # 得到 SR 数据集
@@ -131,7 +191,7 @@ class qnSRDataset(data.Dataset):
         # cv2.imshow("2", np.transpose(img_LQ.numpy(), (2, 1, 0)))
         # cv2.waitKey()
         # exit(0)
-        return {'LQ': img_LQ, 'GT': img_GT, 'LQ_path': LQ_path, 'GT_path': GT_path}
+        return {'LQ': img_LQ, 'GT': img_GT}
 
     def __len__(self):
         return len(self.paths_GT)
@@ -181,6 +241,17 @@ def testSRDS():
 
     print(ds[0])
 
+
+def testSRDS2():
+    ds = qnSRDataset2('d:/hr.h5', noise_dir="D:\\workroom\\tools\\image\\Real-SR\\datasets\DF2K\Corrupted_noise\\")
+    d0 = ds[0]
+    cv2.imshow("1", np.transpose(d0['LQ'].numpy(), (2, 1, 0)))
+    cv2.imshow("2", np.transpose(d0['GT'].numpy(), (2, 1, 0)))
+    cv2.waitKey()
+    exit(0)
+
+    print(ds[0])
+
 if __name__=="__main__":
     # m = Image.open("d:/out.png")
     # print(type(m))
@@ -191,4 +262,5 @@ if __name__=="__main__":
     # print(m[1][1][1])
     # exit(0)
     # testNoise()
-    testSRDS()
+    # testSRDS()
+    testSRDS2()

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from qn_dataset import QNDataset
-from qn_dataset2 import qnSRDataset
+from qn_dataset2 import qnSRDataset, qnSRDataset2
 from torch.utils.data.dataloader import DataLoader
 from models import HRcanNet
 import os
@@ -12,16 +12,17 @@ import torch as t
 import torch.nn as nn
 from utils import AverageMeter, calc_psnr
 from HModels.discriminator_vgg_arch import VGGFeatureExtractor
+import sys
 
 
 def trainDSConfig():
     cfgDict = {
         # "dataroot_GT": "D:\\workroom\\tools\\image\\Real-SR\\datasets\\DF2K\\generated\\tdsr\\HR",
-        'dataroot_GT': '/home/workroom/project/riverlight/datasets/DF2K/generated/tdsr/HR',
+        'dataroot_GT': '/home/workroom/project/riverlight/datasets/DF2K/generated/tdsr/HR/',
         "dataroot_LQ": None,
         "noise": True,
         # "noise_data": "D:\\workroom\\tools\\image\\Real-SR\\datasets\DF2K\Corrupted_noise\\",
-        'noise_data': '/home/workroom/project/riverlight/datasets/DF2K/Corrupted_noise',
+        'noise_data': '/home/workroom/project/riverlight/datasets/DF2K/Corrupted_noise/',
         "patch_size": 96,
         'scale': 2
     }
@@ -86,6 +87,10 @@ def main():
 
     traindsCfg = trainDSConfig()
     train_dataset = qnSRDataset(traindsCfg)
+    if sys.platform=='win32':
+        train_dataset = qnSRDataset2('d:/hr.h5', noise_dir="D:\\workroom\\tools\\image\\Real-SR\\datasets\DF2K\Corrupted_noise\\")
+    else:
+        train_dataset = qnSRDataset2('./qn_dataset/hr.h5', noise_dir='/home/workroom/project/riverlight/datasets/DF2K/Corrupted_noise/')
     train_dataloader = DataLoader(dataset=train_dataset,
                                   batch_size=batch_size,
                                   shuffle=True,

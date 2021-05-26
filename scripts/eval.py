@@ -35,7 +35,7 @@ def eval_image(lr_file=None, eval_file=None, device='cuda'):
         lr_file = "d:/workroom/testroom/old.png"
     out_file = lr_file.replace('.png', '_hsi.png').replace('.jpg', '_hsi.jpg')
     if eval_file is None:
-        eval_file = "../weights/hsi3_epoch_117.pth"
+        eval_file = "../weights/hsi3_epoch_126.pth"
     net = t.load(eval_file)
     net = net.to(device)
     net.eval()
@@ -101,6 +101,6 @@ def eval_cmp_bic_hsi(imagefile):
 
 
 if __name__=="__main__":
-    eval_image(lr_file="D:\\workroom\\tools\\image\\ntire20\\track1-valid-input\\0801.png")
+    eval_image(lr_file="D:\\workroom\\tools\\image\\ntire20\\track1-valid-input\\0802.png")
     # eval_psnr()
     # eval_cmp_bic_hsi_dir()
