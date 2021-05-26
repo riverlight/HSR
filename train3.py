@@ -16,10 +16,12 @@ from HModels.discriminator_vgg_arch import VGGFeatureExtractor
 
 def trainDSConfig():
     cfgDict = {
-        "dataroot_GT": "D:\\workroom\\tools\\image\\Real-SR\\datasets\\DF2K\\generated\\tdsr\\HR",
+        # "dataroot_GT": "D:\\workroom\\tools\\image\\Real-SR\\datasets\\DF2K\\generated\\tdsr\\HR",
+        'dataroot_GT': '/home/workroom/project/riverlight/datasets/DF2K/generated/tdsr/HR',
         "dataroot_LQ": None,
         "noise": True,
-        "noise_data": "D:\\workroom\\tools\\image\\Real-SR\\datasets\DF2K\Corrupted_noise\\",
+        # "noise_data": "D:\\workroom\\tools\\image\\Real-SR\\datasets\DF2K\Corrupted_noise\\",
+        'noise_data': '/home/workroom/project/riverlight/datasets/DF2K/Corrupted_noise',
         "patch_size": 96,
         'scale': 2
     }
@@ -27,8 +29,10 @@ def trainDSConfig():
 
 def evalDSConfig():
     cfgDict = {
-        "dataroot_GT": "D:\\workroom\\tools\\image\\ntire20\\track1-valid-gt-d2\\",
-        "dataroot_LQ": "D:\\workroom\\tools\\image\\ntire20\\track1-valid-input\\",
+        # "dataroot_GT": "D:\\workroom\\tools\\image\\ntire20\\track1-valid-gt-d2\\",
+        # "dataroot_LQ": "D:\\workroom\\tools\\image\\ntire20\\track1-valid-input\\",
+        "dataroot_GT": "/home/workroom/project/riverlight/datasets/track1-valid-gt-d2/",
+        "dataroot_LQ": "/home/workroom/project/riverlight/datasets/track1-valid-input/",
         "noise": False,
         "noise_data": None,
         "patch_size": 96,
@@ -41,7 +45,7 @@ def main():
         use_gpus = True
     else:
         use_gpus = False
-    use_gpus = False
+    # use_gpus = False
     eval_file = "./qn_dataset/eval.h5"
     outputs_dir = "./weights/"
     lr = 1e-4

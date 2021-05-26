@@ -11,6 +11,8 @@ from PIL import Image
 def test():
     sdir = "D:\\workroom\\tools\\image\\ntire20\\track1-valid-gt\\"
     ddir = "D:\\workroom\\tools\\image\\ntire20\\track1-valid-gt-d2\\"
+    sdir = "/home/workroom/project/riverlight/datasets/track1-valid-gt"
+    ddir = "/home/workroom/project/riverlight/datasets/track1-valid-gt-d2"
     filenames = sorted(glob.glob(sdir + '*.png'))
     for name in filenames:
         print(name)

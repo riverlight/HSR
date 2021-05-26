@@ -15,6 +15,7 @@ class VGGFeatureExtractor(nn.Module):
         if use_bn:
             model = torchvision.models.vgg19_bn(pretrained=True)
         else:
+            # model = torchvision.models.vgg19(pretrained=True)
             model = torchvision.models.vgg19(pretrained=False)
             state_dict = torch.load('/home/workroom/project/riverlight/vgg_model/vgg19-dcbb9e9d.pth')
             model.load_state_dict(state_dict)
