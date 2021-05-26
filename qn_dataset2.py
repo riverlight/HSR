@@ -29,7 +29,7 @@ class noiseDataset(data.Dataset):
         # x = np.array([mat['kernel']])
         # x = np.swapaxes(x, 2, 0)
         # print(np.shape(x))
-        print(self.noise_imgs[index])
+        # print(self.noise_imgs[index])
         noise = self.pre_process(Image.open(self.noise_imgs[index]))
         norm_noise = (noise - torch.mean(noise, dim=[1, 2], keepdim=True))
         return norm_noise, noise
@@ -64,7 +64,7 @@ class qnSRDataset(data.Dataset):
         assert cfgDict.get("dataroot_GT", False)
         assert cfgDict.get('dataroot_LQ', False) != False
         assert cfgDict.get('noise', None) != None
-        assert cfgDict.get('noise_data', False)
+        assert cfgDict.get('noise_data', False)!=False
         assert cfgDict.get('patch_size', False)
         assert cfgDict.get('scale', None)
         return True
@@ -90,6 +90,12 @@ class qnSRDataset(data.Dataset):
             img_LQ = hutils.imresize_np(img_GT, 1 / scale, True)
             if img_LQ.ndim == 2:
                 img_LQ = np.expand_dims(img_LQ, axis=2)
+
+        # cv2.imshow("1", img_LQ)
+        # cv2.imshow("2", img_GT)
+        # cv2.waitKey()
+        # print(img_LQ.shape, img_GT.shape)
+        # exit(0)
 
         H, W, C = img_LQ.shape
         LQ_size = GT_size // scale
@@ -132,10 +138,13 @@ class qnSRDataset(data.Dataset):
 
 
 def testNoise():
-    noiDS = noiseDataset(dataset="D:\\workroom\\tools\\image\\Real-SR\\datasets\DF2K\Corrupted_noise\\", size=256)
+    noiDS = noiseDataset(dataset="D:\\workroom\\tools\\image\\Real-SR\\datasets\DF2K\Corrupted_noise\\", size=10)
     print(noiDS.__len__())
-    _, img = noiDS[0]
+    ni, img = noiDS[0]
     print(img.shape)
+    print(img)
+    print(ni)
+    exit(0)
     img = img.numpy().transpose(1, 2, 0)
     img = img[:,:,[2,1,0]]
     print(img.shape)
@@ -154,9 +163,32 @@ def testSRDS():
         "patch_size" : 256,
         'scale' : 2
     }
+    cfgDict = {
+        "dataroot_GT": "D:\\workroom\\tools\\image\\ntire20\\track1-valid-gt-d2\\",
+        "dataroot_LQ": "D:\\workroom\\tools\\image\\ntire20\\track1-valid-input\\",
+        "noise": False,
+        "noise_data": None,
+        "patch_size": 256,
+        'scale': 2
+    }
+
     ds = qnSRDataset(cfgDict)
+    d0 = ds[0]
+    cv2.imshow("1", np.transpose(d0['LQ'].numpy(), (2, 1, 0)))
+    cv2.imshow("2", np.transpose(d0['GT'].numpy(), (2, 1, 0)))
+    cv2.waitKey()
+    exit(0)
+
     print(ds[0])
 
 if __name__=="__main__":
+    # m = Image.open("d:/out.png")
+    # print(type(m))
+    # m = transforms.RandomCrop(10)(m)
+    # m = transforms.ToTensor()(m)
+    # m = np.array(m)
+    # print(m.shape)
+    # print(m[1][1][1])
+    # exit(0)
     # testNoise()
     testSRDS()

@@ -3,7 +3,7 @@
 from qn_dataset import QNDataset
 from qn_dataset2 import qnSRDataset
 from torch.utils.data.dataloader import DataLoader
-from models2 import HRcanRRDBNet
+from models import HRcanNet
 import os
 import torch.optim as optim
 from tqdm import tqdm
@@ -11,6 +11,7 @@ import torch.backends.cudnn as cudnn
 import torch as t
 import torch.nn as nn
 from utils import AverageMeter, calc_psnr
+from HModels.discriminator_vgg_arch import VGGFeatureExtractor
 
 
 def trainDSConfig():
@@ -19,6 +20,17 @@ def trainDSConfig():
         "dataroot_LQ": None,
         "noise": True,
         "noise_data": "D:\\workroom\\tools\\image\\Real-SR\\datasets\DF2K\Corrupted_noise\\",
+        "patch_size": 96,
+        'scale': 2
+    }
+    return cfgDict
+
+def evalDSConfig():
+    cfgDict = {
+        "dataroot_GT": "D:\\workroom\\tools\\image\\ntire20\\track1-valid-gt-d2\\",
+        "dataroot_LQ": "D:\\workroom\\tools\\image\\ntire20\\track1-valid-input\\",
+        "noise": False,
+        "noise_data": None,
         "patch_size": 96,
         'scale': 2
     }
@@ -43,7 +55,7 @@ def main():
 
     seed = 1108
     best_weights = None
-    # best_weights = "./weights/hsi3_epoch_83.pth"
+    # best_weights = "./weights/hsi3_epoch_62.pth"
     start_epoch = 0
 
     if not os.path.exists(outputs_dir):
@@ -51,14 +63,18 @@ def main():
     cudnn.benchmark = True
     device = t.device('cuda:0' if t.cuda.is_available() else 'cpu')
     t.manual_seed(seed)
+    cri_fea = nn.L1Loss().to(device)
+    netPerc = VGGFeatureExtractor(feature_layer=34, use_bn=False, use_input_norm=True, device=device).to(device)
+    netPerc.eval()
     if best_weights is not None:
         model = t.load(best_weights)
     else:
-        model = HRcanRRDBNet().to(device)
+        model = HRcanNet().to(device)
     if use_gpus:
         print("Let's use", t.cuda.device_count(), "GPUs!")
         model = nn.DataParallel(model)
         model.to(device)
+        netPerc = nn.DataParallel(netPerc)
 
     optimizer = optim.Adam(params=model.parameters(), lr=lr)
     # criterion = nn.MSELoss()
@@ -72,7 +88,8 @@ def main():
                                   num_workers=num_workers,
                                   pin_memory=False,
                                   drop_last=True)
-    eval_dataset = QNDataset(eval_file)
+    evaldsCfg = evalDSConfig()
+    eval_dataset = qnSRDataset(evaldsCfg)
     eval_dataloader = DataLoader(dataset=eval_dataset, batch_size=1)
 
     best_epoch = 0
@@ -88,13 +105,20 @@ def main():
             tq.set_description('epoch: {}/{}'.format(epoch, num_epochs - 1))
 
             for i, data in enumerate(train_dataloader):
+                loss = 0
                 hr_img, lr_img = data['GT'], data['LQ']
                 # hr_img = hr_img.to(device)
                 # lr_img = lr_img.to(device)
                 hr_img = hr_img.cuda()
                 lr_img = lr_img.cuda()
                 hsi_img = model(lr_img)
-                loss = criterion(hsi_img, hr_img)
+                loss_pix = criterion(hsi_img, hr_img)
+                loss += 0.01 * loss_pix
+                real_fea = netPerc(hr_img).detach()
+                fake_fea = netPerc(hsi_img)
+                loss_fea = cri_fea(real_fea, fake_fea)
+                loss += 1.0 * loss_fea
+
                 epoch_losses.update(loss.item(), len(hr_img))
                 optimizer.zero_grad()
                 loss.backward()
@@ -112,7 +136,8 @@ def main():
 
         epoch_psnr = AverageMeter()
         for data in eval_dataloader:
-            hr_img, lr_img = data
+            # hr_img, lr_img = data
+            hr_img, lr_img = data['GT'], data['LQ']
             hr_img = hr_img.to(device)
             lr_img = lr_img.to(device)
 
