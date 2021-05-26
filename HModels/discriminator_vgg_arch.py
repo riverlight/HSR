@@ -15,7 +15,9 @@ class VGGFeatureExtractor(nn.Module):
         if use_bn:
             model = torchvision.models.vgg19_bn(pretrained=True)
         else:
-            model = torchvision.models.vgg19(pretrained=True)
+            model = torchvision.models.vgg19(pretrained=False)
+            state_dict = torch.load('/home/workroom/project/riverlight/vgg_model/vgg19-dcbb9e9d.pth')
+            model.load_state_dict(state_dict)
         if self.use_input_norm:
             mean = torch.Tensor([0.485, 0.456, 0.406]).view(1, 3, 1, 1).to(device)
             # [0.485 - 1, 0.456 - 1, 0.406 - 1] if input in range [-1, 1]
