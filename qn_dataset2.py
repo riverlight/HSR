@@ -310,5 +310,5 @@ if __name__=="__main__":
     # exit(0)
     # testNoise()
     # testSRDS()
-    # testSRDS2()
-    testSRDS3()
+    testSRDS2()
+    # testSRDS3()

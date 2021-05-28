@@ -138,7 +138,7 @@ def main():
                 optimizer.step()
                 tq.set_postfix(loss='{:.6f}'.format(epoch_losses.avg))
                 tq.update(len(hr_img))
-                print(i, epoch_losses.avg, pix_losses.ave, fea_losses.ave)
+                print(i, epoch_losses.avg, pix_losses.avg, fea_losses.avg)
 
         if use_gpus:
             t.save(model.module, os.path.join(outputs_dir, 'hsi3_epoch_{}.pth'.format(epoch)))
