@@ -51,7 +51,7 @@ def main():
     outputs_dir = "./weights/"
     lr = 1e-4
     if use_gpus:
-        batch_size = 24*4
+        batch_size = 24*24
         num_workers = 8
     else:
         batch_size = 8
@@ -60,8 +60,8 @@ def main():
 
     seed = 1108
     best_weights = None
-    # best_weights = "./weights/hsi3_epoch_62.pth"
-    start_epoch = 0
+    best_weights = "./weights/hsi3_epoch_213.pth"
+    start_epoch = 214
 
     if not os.path.exists(outputs_dir):
         os.makedirs(outputs_dir)
@@ -88,7 +88,7 @@ def main():
     traindsCfg = trainDSConfig()
     train_dataset = qnSRDataset(traindsCfg)
     if sys.platform=='win32':
-        train_dataset = qnSRDataset2('d:/hr.h5', noise_dir="D:\\workroom\\tools\\image\\Real-SR\\datasets\DF2K\Corrupted_noise\\")
+        train_dataset = qnSRDataset2('./qn_dataset/hr.h5', noise_dir="D:\\workroom\\tools\\image\\Real-SR\\datasets\DF2K\Corrupted_noise\\")
     else:
         train_dataset = qnSRDataset2('./qn_dataset/hr.h5', noise_dir='/home/workroom/project/riverlight/datasets/DF2K/Corrupted_noise/')
     train_dataloader = DataLoader(dataset=train_dataset,
@@ -122,11 +122,11 @@ def main():
                 lr_img = lr_img.cuda()
                 hsi_img = model(lr_img)
                 loss_pix = criterion(hsi_img, hr_img)
-                loss += 0.01 * loss_pix
+                loss += 1.0 * loss_pix
                 real_fea = netPerc(hr_img).detach()
                 fake_fea = netPerc(hsi_img)
                 loss_fea = cri_fea(real_fea, fake_fea)
-                loss += 1.0 * loss_fea
+                loss += 0.2 * loss_fea
 
                 epoch_losses.update(loss.item(), len(hr_img))
                 optimizer.zero_grad()

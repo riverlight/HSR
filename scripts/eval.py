@@ -35,11 +35,12 @@ def eval_image(lr_file=None, eval_file=None, device='cuda'):
         lr_file = "d:/workroom/testroom/old.png"
     out_file = lr_file.replace('.png', '_hsi.png').replace('.jpg', '_hsi.jpg')
     if eval_file is None:
-        eval_file = "../weights/hsi3_epoch_126.pth"
+        eval_file = "../weights/hsi3_noi_5_10.pth"
     net = t.load(eval_file)
     net = net.to(device)
     net.eval()
     image = cv2.imread(lr_file).astype(np.float32)
+    # image = image[:,:,[2,1,0]]
     image = t.from_numpy(image).to(device) / 255
     image = image.permute(2, 0, 1).unsqueeze(0)
     # print(image.shape)
@@ -50,6 +51,7 @@ def eval_image(lr_file=None, eval_file=None, device='cuda'):
 
     # print(preds.shape)
     preds = preds.mul(255.0).cpu().numpy().squeeze(0).transpose(1, 2, 0)
+    # preds = preds[:, :, [2, 1, 0]]
     cv2.imwrite(out_file, preds)
     print('done : ', out_file)
     return out_file
@@ -60,13 +62,13 @@ def eval_psnr():
     # dir0 = "D:\\workroom\\tools\\dataset\\SR\\Set5\\image_SRF_2\\"
     # dir1 = "D:\\workroom\\tools\\dataset\\SR\\Set5\\image_SRF_2\\"
 
-    lr_file = dir1 + "leaf-2-lr.jpg"
-    hr_file = dir0 + 'leaf-2.jpg'
+    lr_file = dir1 + "face-lr.jpg"
+    hr_file = dir0 + 'face.jpg'
     hsi_file = eval_image(lr_file=lr_file)
     psnr = h_psnr.calc_psnr_file(hr_file, hsi_file)
     print(psnr)
 
-    lst_file = [dir1 + "leaf-2-bd.jpg"]
+    lst_file = [dir1 + "face-bd.jpg"]
     for file in lst_file:
         psnr = h_psnr.calc_psnr_file(hr_file, file)
         print(psnr)
@@ -101,6 +103,7 @@ def eval_cmp_bic_hsi(imagefile):
 
 
 if __name__=="__main__":
-    eval_image(lr_file="D:\\workroom\\tools\\image\\ntire20\\track1-valid-input\\0802.png")
-    # eval_psnr()
+    # eval_image(lr_file="D:\\workroom\\tools\\image\\ntire20\\track1-valid-input\\0855.png")
+    # eval_image()
+    eval_psnr()
     # eval_cmp_bic_hsi_dir()

@@ -10,7 +10,7 @@ import hutils
 import random
 import numpy as np
 import h5py
-
+import h_psnr
 
 class noiseDataset(data.Dataset):
     def __init__(self, dataset=None, size=96):
@@ -39,7 +39,54 @@ class noiseDataset(data.Dataset):
         return len(self.noise_imgs)
 
 
+class qnSRDataset3(data.Dataset):
+    # 这个输入跟 2 一样，是 h5 文件，然后做下采样和jpg压缩，生成 LR image
+    def __init__(self, h5file):
+        super(qnSRDataset3, self).__init__()
+        self.patch_size = 96
+        self.scale = 2
+        self.h5_file = h5file
+
+    def __getitem__(self, idx):
+        # CHW
+        with h5py.File(self.h5_file, 'r') as f:
+            img_GT = f['hr'][idx]
+        _, H, W = img_GT.shape
+        # CHW RGB -> HWC BGR ( cv2 like )
+        img_GT = np.transpose(img_GT[[2, 1, 0], :, :], (1, 2, 0))
+
+        jpg_quality = np.random.randint(25, 95)
+        interpolation = [cv2.INTER_CUBIC, cv2.INTER_LINEAR][np.random.randint(0, 2)]
+        order_flag = random.random() < 0.5
+        # print(jpg_quality, interpolation, order_flag)
+        if order_flag:
+            # 先做 jpg 压缩
+            # cv2.imshow("a", img_GT)
+            # cv2.waitKey()
+            ret, gt_buf = cv2.imencode(".jpg", img_GT, [int(cv2.IMWRITE_JPEG_QUALITY), jpg_quality])
+            img_LQ = cv2.imdecode(gt_buf, cv2.IMREAD_COLOR)
+            img_LQ = cv2.resize(img_LQ, (H//self.scale, W//self.scale), interpolation=interpolation)
+        else:
+            # 先做缩放
+            img_LQ = cv2.resize(img_GT, (H // self.scale, W // self.scale), interpolation=interpolation)
+            ret, gt_buf = cv2.imencode(".jpg", img_LQ, [int(cv2.IMWRITE_JPEG_QUALITY), jpg_quality])
+            img_LQ = cv2.imdecode(gt_buf, cv2.IMREAD_COLOR)
+            pass
+
+        # HWC BGR -> CHW RGB
+        img_GT = img_GT[:, :, [2, 1, 0]]
+        img_LQ = img_LQ[:, :, [2, 1, 0]]
+        img_GT = torch.from_numpy(np.ascontiguousarray(np.transpose(img_GT.astype(np.float32)/255, (2, 0, 1)))).float()
+        img_LQ = torch.from_numpy(np.ascontiguousarray(np.transpose(img_LQ.astype(np.float32)/255, (2, 0, 1)))).float()
+        return {'LQ': img_LQ, 'GT': img_GT}
+
+    def __len__(self):
+        with h5py.File(self.h5_file, 'r') as f:
+            return len(f['hr'])
+
+
 class qnSRDataset2(data.Dataset):
+    # 这个的 h5 里面只有 HR image，然后通过 bicubic 做下采样，同时添加 noise，生成 LR image
     def __init__(self, h5file, noise_dir=None):
         super(qnSRDataset2, self).__init__()
         self.patch_size = 96
@@ -51,31 +98,16 @@ class qnSRDataset2(data.Dataset):
             self.noises = None
 
     def __getitem__(self, idx):
+        # CHW
         with h5py.File(self.h5_file, 'r') as f:
             img_GT = f['hr'][idx].astype(np.float32)/255
+        # CHW -> RGB HWC
         img_GT = np.transpose(img_GT, [1, 2, 0])
-        print(img_GT.shape)
         img_LQ = hutils.imresize_np(img_GT, 1 / self.scale, True)
-
-
-        H, W, C = img_LQ.shape
-        LQ_size = self.patch_size // self.scale
-
-        # randomly crop
-        rnd_h = random.randint(0, max(0, H - LQ_size))
-        rnd_w = random.randint(0, max(0, W - LQ_size))
-        img_LQ = img_LQ[rnd_h:rnd_h + LQ_size, rnd_w:rnd_w + LQ_size, :]
-        rnd_h_GT, rnd_w_GT = int(rnd_h * self.scale), int(rnd_w * self.scale)
-        img_GT = img_GT[rnd_h_GT:rnd_h_GT + self.patch_size, rnd_w_GT:rnd_w_GT + self.patch_size, :]
-        # print(rnd_h, rnd_w,rnd_h_GT, rnd_w_GT)
 
         # augmentation - flip, rotate
         img_LQ, img_GT = hutils.augment([img_LQ, img_GT], True, True)
 
-        # BGR to RGB, HWC to CHW, numpy to tensor
-        if img_GT.shape[2] == 3:
-            img_GT = img_GT[:, :, [2, 1, 0]]
-            img_LQ = img_LQ[:, :, [2, 1, 0]]
         img_GT = torch.from_numpy(np.ascontiguousarray(np.transpose(img_GT, (2, 0, 1)))).float()
         img_LQ = torch.from_numpy(np.ascontiguousarray(np.transpose(img_LQ, (2, 0, 1)))).float()
 
@@ -100,6 +132,7 @@ class qnSRDataset2(data.Dataset):
 
 # 得到 SR 数据集
 class qnSRDataset(data.Dataset):
+    # 这个的输入是 HR 和 LR 文件夹，不喜欢它的原因是因为每次 getitem 的时候都要对文件操作，似乎性能比较弱
     def __init__(self, cfgDict):
         super(qnSRDataset, self).__init__()
         assert self.check_cfg(cfgDict)
@@ -243,14 +276,28 @@ def testSRDS():
 
 
 def testSRDS2():
-    ds = qnSRDataset2('d:/hr.h5', noise_dir="D:\\workroom\\tools\\image\\Real-SR\\datasets\DF2K\Corrupted_noise\\")
+    ds = qnSRDataset2('./qn_dataset/hr.h5', noise_dir="D:\\workroom\\tools\\image\\Real-SR\\datasets\DF2K\Corrupted_noise\\")
     d0 = ds[0]
-    cv2.imshow("1", np.transpose(d0['LQ'].numpy(), (2, 1, 0)))
-    cv2.imshow("2", np.transpose(d0['GT'].numpy(), (2, 1, 0)))
+    cv2.imshow("1", np.transpose(d0['LQ'][(2, 1, 0),:,:].numpy(), (1, 2, 0)))
+    cv2.imshow("2", np.transpose(d0['GT'][(2, 1, 0),:,:].numpy(), (1, 2, 0)))
     cv2.waitKey()
     exit(0)
 
     print(ds[0])
+
+
+def testSRDS3():
+    ds = qnSRDataset3('./qn_dataset/hr.h5')
+    d0 = ds[0]
+    cv2.imshow("1", np.transpose(d0['LQ'][(2, 1, 0),:,:].numpy(), (1, 2, 0)))
+    cv2.imshow("2", np.transpose(d0['GT'][(2, 1, 0),:,:].numpy(), (1, 2, 0)))
+    cv2.waitKey()
+    lr = torch.nn.functional.interpolate(d0['LQ'].unsqueeze(0), scale_factor=2, mode="bicubic", align_corners=False)
+    print(h_psnr.calc_psnr_tensor(lr, d0['GT']))
+    exit(0)
+
+    print(ds[0])
+
 
 if __name__=="__main__":
     # m = Image.open("d:/out.png")
@@ -263,4 +310,5 @@ if __name__=="__main__":
     # exit(0)
     # testNoise()
     # testSRDS()
-    testSRDS2()
+    # testSRDS2()
+    testSRDS3()

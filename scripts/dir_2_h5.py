@@ -20,7 +20,7 @@ def main(dir, h5_name):
         imagename = os.path.join(dir, name)
         if os.path.isdir(imagename):
             continue
-        print(imagename)
+        print("id : ", count, imagename)
         # BGR HWC
         hr_img = cv2.imread(imagename, cv2.IMREAD_UNCHANGED)
         # BGR HWC to RGB CHW

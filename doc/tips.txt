@@ -1,0 +1,5 @@
+
+1. 如何制作 hr.h5
+    a. 执行 -> python3 dir_2_h5.py D:\workroom\tools\image\ntire20\Corrupted-tr-y d:\hr.h5
+    b. 把 hr.h5 copy to .\qn_dataset
+
