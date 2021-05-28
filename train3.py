@@ -110,6 +110,8 @@ def main():
         else:
             model.train()
         epoch_losses = AverageMeter()
+        pix_losses = AverageMeter()
+        fea_losses = AverageMeter()
         with tqdm(total=(len(train_dataset) - len(train_dataset) % batch_size)) as tq:
             tq.set_description('epoch: {}/{}'.format(epoch, num_epochs - 1))
 
@@ -122,10 +124,12 @@ def main():
                 lr_img = lr_img.cuda()
                 hsi_img = model(lr_img)
                 loss_pix = criterion(hsi_img, hr_img)
+                pix_losses.update(loss_pix.item(), len(hr_img))
                 loss += 1.0 * loss_pix
                 real_fea = netPerc(hr_img).detach()
                 fake_fea = netPerc(hsi_img)
                 loss_fea = cri_fea(real_fea, fake_fea)
+                fea_losses.update(loss_fea.item(), len(hr_img))
                 loss += 0.2 * loss_fea
 
                 epoch_losses.update(loss.item(), len(hr_img))
@@ -134,7 +138,7 @@ def main():
                 optimizer.step()
                 tq.set_postfix(loss='{:.6f}'.format(epoch_losses.avg))
                 tq.update(len(hr_img))
-                print(i, epoch_losses.avg)
+                print(i, epoch_losses.avg, pix_losses.ave, fea_losses.ave)
 
         if use_gpus:
             t.save(model.module, os.path.join(outputs_dir, 'hsi3_epoch_{}.pth'.format(epoch)))
