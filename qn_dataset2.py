@@ -41,8 +41,9 @@ class noiseDataset(data.Dataset):
 
 class qnSRDataset3(data.Dataset):
     # 这个输入跟 2 一样，是 h5 文件，然后做下采样和jpg压缩，生成 LR image
-    def __init__(self, h5file):
+    def __init__(self, h5file, interval=0):
         super(qnSRDataset3, self).__init__()
+        self.interval = interval
         self.patch_size = 96
         self.scale = 2
         self.h5_file = h5file
@@ -50,7 +51,8 @@ class qnSRDataset3(data.Dataset):
     def __getitem__(self, idx):
         # CHW
         with h5py.File(self.h5_file, 'r') as f:
-            img_GT = f['hr'][idx]
+            randint = np.random.randint(0, self.interval+1)
+            img_GT = f['hr'][idx*(self.interval+1)+randint]
         _, H, W = img_GT.shape
         # CHW RGB -> HWC BGR ( cv2 like )
         img_GT = np.transpose(img_GT[[2, 1, 0], :, :], (1, 2, 0))
@@ -82,7 +84,7 @@ class qnSRDataset3(data.Dataset):
 
     def __len__(self):
         with h5py.File(self.h5_file, 'r') as f:
-            return len(f['hr'])
+            return len(f['hr']) // (self.interval+1)
 
 
 class qnSRDataset2(data.Dataset):

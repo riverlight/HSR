@@ -75,8 +75,8 @@ def main():
                                   num_workers=num_workers,
                                   pin_memory=False,
                                   drop_last=True)
-    eval_dataset = qnSRDataset3('./qn_dataset/vsr-val.h5')
-    eval_dataloader = DataLoader(dataset=eval_dataset, batch_size=1)
+    eval_dataset = qnSRDataset3('./qn_dataset/vsr-val.h5', interval=1)
+    eval_dataloader = DataLoader(dataset=eval_dataset, batch_size=batch_size, num_workers=num_workers)
 
     best_epoch = 0
     best_psnr = 0.0
