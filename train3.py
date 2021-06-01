@@ -60,8 +60,8 @@ def main():
 
     seed = 1108
     best_weights = None
-    best_weights = "./weights/hsi3_epoch_213.pth"
-    start_epoch = 214
+    best_weights = "./weights/hsi3_epoch_263.pth"
+    start_epoch = 264
 
     if not os.path.exists(outputs_dir):
         os.makedirs(outputs_dir)
@@ -130,7 +130,7 @@ def main():
                 fake_fea = netPerc(hsi_img)
                 loss_fea = cri_fea(real_fea, fake_fea)
                 fea_losses.update(loss_fea.item(), len(hr_img))
-                loss += 0.2 * loss_fea
+                loss += 0.00 * loss_fea
 
                 epoch_losses.update(loss.item(), len(hr_img))
                 optimizer.zero_grad()

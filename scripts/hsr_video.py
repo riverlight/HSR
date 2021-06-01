@@ -3,7 +3,7 @@
 import torch as t
 import sys
 sys.path.append("../")
-from models import HSISRNet
+from models import HRcanNet
 import cv2
 import numpy as np
 import h_psnr
@@ -12,7 +12,7 @@ import time
 
 
 class CSISR:
-    def __init__(self, weights_file="../weights/hsi_best_hrcan55.pth"):
+    def __init__(self, weights_file="../weights/hsi3_noi_5_10.pth"):
         self._device = 'cuda'
         # self._net = HSISRNet().to(self._device)
         self._net = t.load(weights_file).to(self._device)

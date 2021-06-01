@@ -3,3 +3,8 @@ eval.h5 : D:\\workroom\\tools\\dataset\\SR\\qnSR_DS\\eval
 
 T91.h5 : D:\\workroom\\tools\\dataset\\SR\\T91-image\\T91\\T91
 Set5.h5 : D:\workroom\tools\dataset\SR\srgan\Set5
+
+hr.h5: 只包含 hr 数据，使用 ntire20 track1 的 clean-up train 数据制作
+
+vsr-train.h5: 跟 hr.h5 类似，增加了一些人脸的image
+vsr-val.h5: 由 ntire20 track1 的 val-gt 数据构成(100 images)，同时增加了10张人脸的image

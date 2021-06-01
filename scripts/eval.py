@@ -62,13 +62,13 @@ def eval_psnr():
     # dir0 = "D:\\workroom\\tools\\dataset\\SR\\Set5\\image_SRF_2\\"
     # dir1 = "D:\\workroom\\tools\\dataset\\SR\\Set5\\image_SRF_2\\"
 
-    lr_file = dir1 + "face-lr.jpg"
-    hr_file = dir0 + 'face.jpg'
+    lr_file = dir1 + "leaf-lr.jpg"
+    hr_file = dir0 + 'leaf.jpg'
     hsi_file = eval_image(lr_file=lr_file)
     psnr = h_psnr.calc_psnr_file(hr_file, hsi_file)
     print(psnr)
 
-    lst_file = [dir1 + "face-bd.jpg"]
+    lst_file = [dir1 + "leaf-bd.jpg"]
     for file in lst_file:
         psnr = h_psnr.calc_psnr_file(hr_file, file)
         print(psnr)
@@ -103,7 +103,7 @@ def eval_cmp_bic_hsi(imagefile):
 
 
 if __name__=="__main__":
-    # eval_image(lr_file="D:\\workroom\\tools\\image\\ntire20\\track1-valid-input\\0855.png")
+    # eval_image(lr_file="D:\\workroom\\tools\\image\\ntire20\\track1-valid-input\\0863.png")
     # eval_image()
     eval_psnr()
     # eval_cmp_bic_hsi_dir()
