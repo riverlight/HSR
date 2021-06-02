@@ -33,8 +33,10 @@ def main():
 
     seed = 1108
     best_weights = None
-    # best_weights = "./weights/hsi4_epoch_213.pth"
-    start_epoch = 0
+    best_d = None
+    best_weights = "./weights/hsi4_epoch_59.pth"
+    # best_d = "./weights/hsi4_d_213.pth"
+    start_epoch = 60
 
     if not os.path.exists(outputs_dir):
         os.makedirs(outputs_dir)
@@ -59,7 +61,10 @@ def main():
     criterion = nn.L1Loss().to(device)
 
     # 判别器相关
-    netD = NLayerDiscriminator(input_nc=3, ndf=64, n_layers=3).to(device)
+    if best_d is not None:
+        netD = t.load(best_d)
+    else:
+        netD = NLayerDiscriminator(input_nc=3, ndf=64, n_layers=3).to(device)
     if use_gpus:
         netD = nn.DataParallel(netD)
     netD.train()
@@ -143,9 +148,11 @@ def main():
 
         if use_gpus:
             t.save(model.module, os.path.join(outputs_dir, 'hsi4_epoch_{}.pth'.format(epoch)))
+            t.save(netD.module, os.path.join(outputs_dir, 'hsi4_d_{}.pth'.format(epoch)))
             model.module.eval()
         else:
             t.save(model, os.path.join(outputs_dir, 'hsi4_epoch_{}.pth'.format(epoch)))
+            t.save(netD, os.path.join(outputs_dir, 'hsi4_d_{}.pth'.format(epoch)))
             model.eval()
 
         epoch_psnr = AverageMeter()

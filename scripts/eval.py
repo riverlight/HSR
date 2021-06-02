@@ -35,7 +35,7 @@ def eval_image(lr_file=None, eval_file=None, device='cuda'):
         lr_file = "d:/workroom/testroom/old.png"
     out_file = lr_file.replace('.png', '_hsi.png').replace('.jpg', '_hsi.jpg')
     if eval_file is None:
-        eval_file = "../weights/hsi3_noi_5_10.pth"
+        eval_file = "../weights/hsi4_noi_5_10.pth"
     net = t.load(eval_file)
     net = net.to(device)
     net.eval()
@@ -62,13 +62,13 @@ def eval_psnr():
     # dir0 = "D:\\workroom\\tools\\dataset\\SR\\Set5\\image_SRF_2\\"
     # dir1 = "D:\\workroom\\tools\\dataset\\SR\\Set5\\image_SRF_2\\"
 
-    lr_file = dir1 + "leaf-lr.jpg"
-    hr_file = dir0 + 'leaf.jpg'
+    lr_file = dir1 + "car-lr.jpg"
+    hr_file = dir0 + 'car.jpg'
     hsi_file = eval_image(lr_file=lr_file)
     psnr = h_psnr.calc_psnr_file(hr_file, hsi_file)
     print(psnr)
 
-    lst_file = [dir1 + "leaf-bd.jpg"]
+    lst_file = [dir1 + "car-bd.jpg"]
     for file in lst_file:
         psnr = h_psnr.calc_psnr_file(hr_file, file)
         print(psnr)
