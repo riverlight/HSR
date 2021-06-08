@@ -5,7 +5,7 @@ import torch
 
 def main():
     device = 'cuda'
-    weights_file = "../weights/BSRGANx2.pt"
+    weights_file = "../weights/hsi4_noi_5_10.pth"
     net = torch.load(weights_file)
     net = net.to(device)
     net.eval()
@@ -14,7 +14,7 @@ def main():
     example = torch.rand(1, 3, 96, 96).to(device)
     traced_script_module = torch.jit.trace(net, example)
     traced_script_module.save(weights_file.replace(".pth", ".pt"))
-    pass
+    print('done')
 
 
 if __name__=="__main__":
