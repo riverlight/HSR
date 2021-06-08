@@ -34,9 +34,9 @@ def main():
     seed = 1108
     best_weights = None
     best_d = None
-    best_weights = "./weights/hsi4_epoch_59.pth"
-    # best_d = "./weights/hsi4_d_213.pth"
-    start_epoch = 60
+    best_weights = "./weights/hsi4_epoch_399.pth"
+    best_d = "./weights/hsi4_d_399.pth"
+    start_epoch = 12
 
     if not os.path.exists(outputs_dir):
         os.makedirs(outputs_dir)
@@ -111,12 +111,12 @@ def main():
                 hr_fake = model(lr_img)
                 loss_pix = criterion(hr_fake, hr_img)
                 pix_losses.update(loss_pix.item(), len(hr_img))
-                lossG += 1.0 * loss_pix
+                lossG += 0.01 * loss_pix
                 real_fea = netPerc(hr_img).detach()
                 fake_fea = netPerc(hr_fake)
                 loss_fea = cri_fea(real_fea, fake_fea)
                 fea_losses.update(loss_fea.item(), len(hr_img))
-                lossG += 0.2 * loss_fea
+                lossG += 1.0 * loss_fea
 
                 pred_g_fake = netD(hr_fake)
                 pred_d_real = netD(hr_img).detach()

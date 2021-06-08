@@ -5,7 +5,7 @@ import torch
 
 def main():
     device = 'cuda'
-    weights_file = "../weights/hsi_best.pth"
+    weights_file = "../weights/BSRGANx2.pt"
     net = torch.load(weights_file)
     net = net.to(device)
     net.eval()

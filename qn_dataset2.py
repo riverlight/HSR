@@ -57,7 +57,7 @@ class qnSRDataset3(data.Dataset):
         # CHW RGB -> HWC BGR ( cv2 like )
         img_GT = np.transpose(img_GT[[2, 1, 0], :, :], (1, 2, 0))
 
-        jpg_quality = np.random.randint(25, 95)
+        jpg_quality = np.random.randint(10, 95)
         interpolation = [cv2.INTER_CUBIC, cv2.INTER_LINEAR][np.random.randint(0, 2)]
         order_flag = random.random() < 0.5
         # print(jpg_quality, interpolation, order_flag)

@@ -21,6 +21,7 @@ torch::jit::script::Module load_model(string model_path)
     }
     catch (const c10::Error& e) {
         std::cerr << "error loading the model\n";
+        cout << e.what() << endl;
         
     }
     cout << "loading model OK" << "\n";
@@ -69,11 +70,12 @@ cv::Mat torchTensortoCVMat(torch::Tensor& tensor)
 
 int sr_image()
 {
-    //ÔØÈëÄ£ÐÍ
+    //ï¿½ï¿½ï¿½ï¿½Ä£ï¿½ï¿½
     string weight_path = "D:/workroom/project/riverlight/HSR/weights/BSRGANx2.pt";
+    //string weight_path = "D:/workroom/project/riverlight/qir/weights/HSRx2_m1_5_10.pt";
     torch::jit::script::Module module = load_model(weight_path);
 
-    //ÊäÈëÍ¼Ïñ
+    //ï¿½ï¿½ï¿½ï¿½Í¼ï¿½ï¿½
     string img_path = "d:/workroom/testroom/old.png";
     cv::Mat image = cv::imread(img_path);
     auto img_tensor = img2tensor(image);
@@ -93,7 +95,7 @@ int sr_image()
         auto pred = inference(module, img_tensor);
         cout << "out shape : " << pred.sizes() << endl;
         t = (double)cv::getTickCount() - t;
-        printf("µ¥ÕÅºÄ·ÑÊ±¼äÎª:  %gs\n", t / cv::getTickFrequency());
+        printf("ï¿½ï¿½ï¿½ÅºÄ·ï¿½Ê±ï¿½ï¿½Îª:  %gs\n", t / cv::getTickFrequency());
         cv::Mat out_img = torchTensortoCVMat(pred);
         cv::imwrite("d:/out.png", out_img);
     }
@@ -103,8 +105,8 @@ int sr_image()
     //std::cout << pred << std::endl;
 
     t0 = (double)cv::getTickCount() - t0;
-    printf("×ÜºÄ·ÑÊ±¼äÎª:  %gs\n", t0 / cv::getTickFrequency());
-    printf("Ã¿Ãë:  %g ÕÅ \n", num * cv::getTickFrequency() / t0);
+    printf("ï¿½ÜºÄ·ï¿½Ê±ï¿½ï¿½Îª:  %gs\n", t0 / cv::getTickFrequency());
+    printf("Ã¿ï¿½ï¿½:  %g ï¿½ï¿½ \n", num * cv::getTickFrequency() / t0);
 
     std::cout << "ok\n";
 
@@ -118,7 +120,7 @@ int sr_video()
     write.open("d:/workroom/testroom/xgm_bsrgan.avi", /*CAP_OPENCV_MJPEG*/ VideoWriter::fourcc('I', '4', '2', '0'),
         cap.get(cv::CAP_PROP_FPS), Size(cap.get(cv::CAP_PROP_FRAME_WIDTH)*2, cap.get(cv::CAP_PROP_FRAME_HEIGHT)*2));
 
-    //ÔØÈëÄ£ÐÍ
+    //ï¿½ï¿½ï¿½ï¿½Ä£ï¿½ï¿½
     string weight_path = "D:/workroom/project/riverlight/HSR/weights/BSRGANx2.pt";
     torch::jit::script::Module module = load_model(weight_path);
 
@@ -146,9 +148,8 @@ int sr_video()
 
 int main(int argc, const char* argv[]) 
 {
-    //sr_image();
-    sr_video();
+    sr_image();
+    //sr_video();
 
     return 0;
 }
-
