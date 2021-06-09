@@ -29,11 +29,13 @@ class CTrain():
             self.num_workers = 8
             self.train_interval = 0
             self.val_interval = 1
+            self.camera_flag = True
         else:
             self.batch_size = 8
             self.num_workers = 1
             self.train_interval = 7
             self.val_interval = 15
+            self.camera_flag = False
         self.num_epochs = 400
         self.best_weights = None
         self.best_d = None
@@ -95,7 +97,7 @@ class CTrain():
                                       pin_memory=False,
                                       drop_last=True)
         self.eval_dataset = qnDataset('./qn_dataset/vsr_val_hwcbgr.h5', interval=self.val_interval)
-        self.eval_dataset.config(scale=1, camera=False)
+        self.eval_dataset.config(scale=1, camera=self.camera_flag)
         self.eval_dataloader = DataLoader(dataset=self.eval_dataset, batch_size=self.batch_size, num_workers=self.num_workers)
         self.trainds_len = len(self.train_dataset)
         print(len(self.train_dataset), len(self.eval_dataset))
