@@ -22,21 +22,27 @@ def main():
     else:
         use_gpus = True
     outputs_dir = "./weights/"
-    lr = 1e-4
+
     if use_gpus:
-        batch_size = 24*24
+        lr = 3e-4
+        batch_size = 24*1
         num_workers = 8
+        train_interval = 3
+        val_interval = 7
     else:
+        lr = 1e-4
         batch_size = 8
         num_workers = 1
+        train_interval = 31
+        val_interval = 15
     num_epochs = 400
 
     seed = 1108
     best_weights = None
     best_d = None
-    best_weights = "./weights/hsi4_epoch_399.pth"
-    best_d = "./weights/hsi4_d_399.pth"
-    start_epoch = 12
+    best_weights = "./weights/hsi4_epoch_4.pth"
+    best_d = "./weights/hsi4_d_4.pth"
+    start_epoch = 5
 
     if not os.path.exists(outputs_dir):
         os.makedirs(outputs_dir)
@@ -73,14 +79,14 @@ def main():
     lr_D = 1e-4
     optimizer_D = optim.Adam(params=netD.parameters(), lr=lr_D)
 
-    train_dataset = qnSRDataset3('./qn_dataset/vsr-train.h5')
+    train_dataset = qnSRDataset3('./qn_dataset/vsr-train.h5', interval=train_interval)
     train_dataloader = DataLoader(dataset=train_dataset,
                                   batch_size=batch_size,
                                   shuffle=True,
                                   num_workers=num_workers,
                                   pin_memory=False,
                                   drop_last=True)
-    eval_dataset = qnSRDataset3('./qn_dataset/vsr-val.h5', interval=1)
+    eval_dataset = qnSRDataset3('./qn_dataset/vsr-val.h5', interval=val_interval)
     eval_dataloader = DataLoader(dataset=eval_dataset, batch_size=batch_size, num_workers=num_workers)
 
     best_epoch = 0

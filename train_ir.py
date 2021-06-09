@@ -27,14 +27,15 @@ class CTrain():
         else:
             self.use_gpus = True
 
-        self.lr = 1e-4
         if self.use_gpus:
-            self.batch_size = 24 * 24
+            self.lr = 3e-4
+            self.batch_size = 24 * 1
             self.num_workers = 8
-            self.train_interval = 0
-            self.val_interval = 1
-            self.camera_flag = True
+            self.train_interval = 7
+            self.val_interval = 3
+            self.camera_flag = False
         else:
+            self.lr = 1e-4
             self.batch_size = 8
             self.num_workers = 1
             self.train_interval = 7
@@ -46,7 +47,7 @@ class CTrain():
         # self.best_weights = "./weights/qir_epoch_399.pth"
         # self.best_d = "./weights/qir_d_399.pth"
         self.start_epoch = 0
-        self.device = t.device('cuda:0' if t.cuda.is_available() else 'cpu')
+        self.device = t.device('cuda' if t.cuda.is_available() else 'cpu')
 
         self.cri_fea = nn.L1Loss().to(self.device)
         self.netPerc = VGGFeatureExtractor(feature_layer=34, use_bn=False, use_input_norm=True, device=self.device).to(self.device)
