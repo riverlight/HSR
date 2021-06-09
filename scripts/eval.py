@@ -10,7 +10,6 @@ import numpy as np
 import h_psnr
 import os
 
-
 def eval_np(lr_img, eval_file=None, device='cuda'):
     if eval_file is None:
         eval_file = "../weights/hsi3_epoch_117.pth"

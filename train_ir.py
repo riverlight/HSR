@@ -14,6 +14,10 @@ from HModels.discriminator_vgg_arch import VGGFeatureExtractor, NLayerDiscrimina
 from HModels.loss import GANLoss
 import sys
 
+if sys.platform != 'win32':
+    os.environ['TF_XLA_FLAGS'] = '--tf_xla_enable_xla_devices'
+    os.environ['TF_CPP_MIN_LOG_LEVEL']='2'
+
 
 class CTrain():
     def __init__(self):
@@ -68,10 +72,10 @@ class CTrain():
         if not os.path.exists(self.outputs_dir):
             os.makedirs(self.outputs_dir)
 
-
         cudnn.benchmark = True
         seed = 1108
         t.manual_seed(seed)
+
 
     def init_D(self):
         # 判别器相关
@@ -182,8 +186,8 @@ class CTrain():
             for data in self.eval_dataloader:
                 # real_img, ni_img = data
                 real_img, ni_img = data['GT'], data['NI']
-                real_img = real_img.to(self.device)
-                ni_img = ni_img.to(self.device)
+                real_img = real_img.cuda()
+                ni_img = ni_img.cuda()
 
                 with t.no_grad():
                     hsi_img = self.model(ni_img).clamp(0.0, 1.0)
