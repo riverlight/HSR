@@ -58,7 +58,7 @@ class qnSRDataset3(data.Dataset):
         img_GT = np.transpose(img_GT[[2, 1, 0], :, :], (1, 2, 0))
 
         # augmentation - flip, rotate
-        img_GT = hutils.augment([img_GT], True, True)
+        [img_GT] = hutils.augment([img_GT], True, True)
 
         jpg_quality = np.random.randint(10, 95)
         interpolation = [cv2.INTER_CUBIC, cv2.INTER_LINEAR][np.random.randint(0, 2)]
