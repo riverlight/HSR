@@ -10,9 +10,11 @@ import numpy as np
 import h_psnr
 import os
 
+default_eval_file = "../weights/hsi4_epoch_55.pth"
+
 def eval_np(lr_img, eval_file=None, device='cuda'):
     if eval_file is None:
-        eval_file = "../weights/hsi3_epoch_117.pth"
+        eval_file = default_eval_file
     net = t.load(eval_file)
     net = net.to(device)
     net.eval()
@@ -34,7 +36,7 @@ def eval_image(lr_file=None, eval_file=None, device='cuda'):
         lr_file = "d:/workroom/testroom/old.png"
     out_file = lr_file.replace('.png', '_hsi.png').replace('.jpg', '_hsi.jpg')
     if eval_file is None:
-        eval_file = "../weights/hsi4_noi_5_10.pth"
+        eval_file = default_eval_file
     net = t.load(eval_file)
     net = net.to(device)
     net.eval()
@@ -61,7 +63,7 @@ def eval_psnr():
     # dir0 = "D:\\workroom\\tools\\dataset\\SR\\Set5\\image_SRF_2\\"
     # dir1 = "D:\\workroom\\tools\\dataset\\SR\\Set5\\image_SRF_2\\"
 
-    name = 'motor'
+    name = 'leaf-2'
     lr_file = dir1 + "{}-lr.jpg".format(name)
     hr_file = dir0 + '{}.jpg'.format(name)
     hsi_file = eval_image(lr_file=lr_file)

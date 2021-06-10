@@ -18,6 +18,8 @@ if sys.platform != 'win32':
     os.environ['TF_XLA_FLAGS'] = '--tf_xla_enable_xla_devices'
     os.environ['TF_CPP_MIN_LOG_LEVEL']='2'
 
+def prn_obj(obj):
+    print('\n'.join(['%s:%s' % item for item in obj.__dict__.items()]))
 
 class CTrain():
     def __init__(self):
@@ -28,8 +30,8 @@ class CTrain():
             self.use_gpus = True
 
         if self.use_gpus:
-            self.lr = 3e-4
-            self.batch_size = 24 * 1
+            self.lr = 1e-4
+            self.batch_size = 8 * 2
             self.num_workers = 8
             self.train_interval = 7
             self.val_interval = 3
@@ -44,9 +46,9 @@ class CTrain():
         self.num_epochs = 400
         self.best_weights = None
         self.best_d = None
-        # self.best_weights = "./weights/qir_epoch_399.pth"
-        # self.best_d = "./weights/qir_d_399.pth"
-        self.start_epoch = 0
+        self.best_weights = "./weights/qir_epoch_49.pth"
+        self.best_d = "./weights/qir_d_49.pth"
+        self.start_epoch = 50
         self.device = t.device('cuda' if t.cuda.is_available() else 'cpu')
 
         self.cri_fea = nn.L1Loss().to(self.device)
@@ -89,7 +91,7 @@ class CTrain():
         self.netD.train()
         self.cri_d = GANLoss('ragan', 1.0, 0.0).to(self.device)
         self.l_d_w = 0.005
-        self.lr_D = 1e-4
+        self.lr_D = self.lr
         self.optimizer_D = optim.Adam(params=self.netD.parameters(), lr=self.lr_D)
 
     def init_dataset(self):
@@ -172,7 +174,7 @@ class CTrain():
 
                     tq.set_postfix(loss='{:.6f}'.format(epoch_losses.avg))
                     tq.update(len(real_img))
-                    print(i, epoch_losses.avg, pix_losses.avg, fea_losses.avg, d_losses.avg)
+                    print('epoch:', i, epoch_losses.avg, pix_losses.avg, fea_losses.avg, d_losses.avg)
 
             if self.use_gpus:
                 t.save(self.model.module, os.path.join(self.outputs_dir, 'qir_epoch_{}.pth'.format(epoch)))
@@ -209,6 +211,7 @@ class CTrain():
 
 def main():
     app = CTrain()
+    prn_obj(app)
     app.train()
 
 if __name__=="__main__":

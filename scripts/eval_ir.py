@@ -12,7 +12,7 @@ import os
 import time
 
 
-default_eval_file = "../weights/qir_epoch_5.pth"
+default_eval_file = "../weights/qir_epoch_45.pth"
 
 
 class CIR:
@@ -101,5 +101,5 @@ def eval_image(imagename):
     return out_file
 
 if __name__=="__main__":
-    # eval_image("d:/workroom/testroom/old.png")
-    eval_video()
+    eval_image("d:/workroom/testroom/old.png")
+    # eval_video()

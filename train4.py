@@ -24,8 +24,8 @@ def main():
     outputs_dir = "./weights/"
 
     if use_gpus:
-        lr = 3e-4
-        batch_size = 24*1
+        lr = 1e-4
+        batch_size = 8*1
         num_workers = 8
         train_interval = 3
         val_interval = 7
@@ -40,9 +40,9 @@ def main():
     seed = 1108
     best_weights = None
     best_d = None
-    best_weights = "./weights/hsi4_epoch_4.pth"
-    best_d = "./weights/hsi4_d_4.pth"
-    start_epoch = 5
+    best_weights = "./weights/hsi4_epoch_82.pth"
+    best_d = "./weights/hsi4_d_82.pth"
+    start_epoch = 83
 
     if not os.path.exists(outputs_dir):
         os.makedirs(outputs_dir)
@@ -150,7 +150,7 @@ def main():
 
                 tq.set_postfix(loss='{:.6f}'.format(epoch_losses.avg))
                 tq.update(len(hr_img))
-                print(i, epoch_losses.avg, pix_losses.avg, fea_losses.avg, d_losses.avg)
+                print('epoch: ', i, epoch_losses.avg, pix_losses.avg, fea_losses.avg, d_losses.avg)
 
         if use_gpus:
             t.save(model.module, os.path.join(outputs_dir, 'hsi4_epoch_{}.pth'.format(epoch)))
