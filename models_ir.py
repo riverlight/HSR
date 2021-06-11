@@ -18,8 +18,8 @@ class HRcanIRNet(nn.Module):
         self._reduction = 16
         self._act = nn.ReLU(True)
         self._res_scale = 1
-        self._n_resblocks = 3
-        self._n_resgroup = 3
+        self._n_resblocks = 10
+        self._n_resgroup = 5
 
         self._head = common.BasicBlock(3, self._n_feat, 5, bias=True, bn=False, act=nn.PReLU())
         lst_body = [
@@ -28,7 +28,7 @@ class HRcanIRNet(nn.Module):
             for _ in range(self._n_resgroup)]
         lst_body.append(self._conv(self._n_feat, self._n_feat, self._kernel))
         self._resbody = nn.Sequential(*lst_body)
-        self._tail = common.BasicBlock(self._n_feat, 3, 3, bn=False, act=None, bias=True)
+        self._tail = common.BasicBlock(self._n_feat, 3, 9, bn=False, act=nn.Tanh(), bias=True)
 
     def forward(self, img):
         head_out = self._head(img)

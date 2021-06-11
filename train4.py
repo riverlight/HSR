@@ -30,7 +30,7 @@ def main():
         train_interval = 3
         val_interval = 7
     else:
-        lr = 1e-4
+        lr = 3e-5
         batch_size = 8
         num_workers = 1
         train_interval = 31
@@ -40,9 +40,9 @@ def main():
     seed = 1108
     best_weights = None
     best_d = None
-    best_weights = "./weights/hsi4_epoch_82.pth"
-    best_d = "./weights/hsi4_d_82.pth"
-    start_epoch = 83
+    best_weights = "./weights/hsi4_epoch_198.pth"
+    best_d = "./weights/hsi4_d_198.pth"
+    start_epoch = 199
 
     if not os.path.exists(outputs_dir):
         os.makedirs(outputs_dir)

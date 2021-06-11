@@ -66,6 +66,9 @@ class CTrain():
         self.optimizer = optim.Adam(params=self.model.parameters(), lr=self.lr)
         # criterion = nn.MSELoss()
         self.cri_pix = nn.L1Loss().to(self.device)
+        self.l_pix_w = 0.8
+        self.l_fea_w = 0.1
+        self.l_d_w = 0.1
 
         self.init_D()
         self.init_dataset()
@@ -90,7 +93,6 @@ class CTrain():
             self.netD = nn.DataParallel(self.netD)
         self.netD.train()
         self.cri_d = GANLoss('ragan', 1.0, 0.0).to(self.device)
-        self.l_d_w = 0.005
         self.lr_D = self.lr
         self.optimizer_D = optim.Adam(params=self.netD.parameters(), lr=self.lr_D)
 
@@ -140,12 +142,12 @@ class CTrain():
                     hr_fake = self.model(ni_img)
                     loss_pix = self.cri_pix(hr_fake, real_img)
                     pix_losses.update(loss_pix.item(), len(real_img))
-                    lossG += 0.01 * loss_pix
+                    lossG += self.l_pix_w * loss_pix
                     real_fea = self.netPerc(real_img).detach()
                     fake_fea = self.netPerc(hr_fake)
                     loss_fea = self.cri_fea(real_fea, fake_fea)
                     fea_losses.update(loss_fea.item(), len(real_img))
-                    lossG += 1.0 * loss_fea
+                    lossG += self.l_fea_w * loss_fea
 
                     pred_g_fake = self.netD(hr_fake)
                     pred_d_real = self.netD(real_img).detach()
