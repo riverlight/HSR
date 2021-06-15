@@ -56,7 +56,8 @@ def config_to_seq(confDict):
             B_down["down_mode"] = "bicubic"
         degrade_seq.append(B_down)
 
-    if confDict['noise'] and random.randint(1, 4) <= 3:
+    # if confDict['noise'] and random.randint(1, 4) <= 3:
+    if confDict['noise']:
         # --------------
         # gaussian noise
         # --------------
@@ -66,7 +67,8 @@ def config_to_seq(confDict):
         }
         degrade_seq.append(B_noise)
 
-    if confDict['jpeg'] and random.randint(1, 4) <= 3:
+    # if confDict['jpeg'] and random.randint(1, 4) <= 3:
+    if confDict['jpeg']:
         # ----------
         # jpeg noise
         # ----------
@@ -76,7 +78,8 @@ def config_to_seq(confDict):
         }
         degrade_seq.append(B_jpeg)
 
-    if confDict['camera'] and random.randint(1, 4) <= 3:
+    if confDict['camera']:
+    # if confDict['camera'] and random.randint(1, 4) <= 3:
         # -------------------
         # Processed camera sensor noise
         # -------------------
