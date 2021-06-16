@@ -74,7 +74,7 @@ def config_to_seq(confDict):
         # ----------
         B_jpeg = {
             "mode": "jpeg",
-            "qf": random.randint(80, 90)
+            "qf": random.randint(70, 95)
         }
         degrade_seq.append(B_jpeg)
 
@@ -96,7 +96,7 @@ def config_to_seq(confDict):
         "mode": "jpeg",
         "qf": random.randint(65, 95)
     }
-    degrade_seq.append(B_jpeg_last)
+    # degrade_seq.append(B_jpeg_last)
 
     return degrade_seq
 
