@@ -31,9 +31,9 @@ class CTrain():
 
         if self.use_gpus:
             self.lr = 1e-4
-            self.batch_size = 8 * 2
+            self.batch_size = 24*10
             self.num_workers = 8
-            self.train_interval = 7
+            self.train_interval = 3
             self.val_interval = 3
             self.camera_flag = False
         else:
@@ -46,9 +46,9 @@ class CTrain():
         self.num_epochs = 400
         self.best_weights = None
         self.best_d = None
-        # self.best_weights = "./weights/qir_epoch_49.pth"
-        # self.best_d = "./weights/qir_d_49.pth"
-        self.start_epoch = 0
+        self.best_weights = "./weights/qir_epoch_80.pth"
+        self.best_d = "./weights/qir_d_80.pth"
+        self.start_epoch = 81
         self.device = t.device('cuda' if t.cuda.is_available() else 'cpu')
 
         self.cri_fea = nn.L1Loss().to(self.device)
@@ -66,8 +66,8 @@ class CTrain():
         self.optimizer = optim.Adam(params=self.model.parameters(), lr=self.lr)
         # criterion = nn.MSELoss()
         self.cri_pix = nn.L1Loss().to(self.device)
-        self.l_pix_w = 0.8
-        self.l_fea_w = 0.1
+        self.l_pix_w = 0.88
+        self.l_fea_w = 0.02
         self.l_d_w = 0.1
 
         self.init_D()

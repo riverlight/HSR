@@ -30,7 +30,7 @@ def main():
         train_interval = 3
         val_interval = 7
     else:
-        lr = 3e-5
+        lr = 1e-5
         batch_size = 8
         num_workers = 1
         train_interval = 31
@@ -40,9 +40,9 @@ def main():
     seed = 1108
     best_weights = None
     best_d = None
-    best_weights = "./weights/hsi4_epoch_198.pth"
-    best_d = "./weights/hsi4_d_198.pth"
-    start_epoch = 199
+    best_weights = "./weights/hsi4_epoch_310.pth"
+    best_d = "./weights/hsi4_d_310.pth"
+    start_epoch = 311
 
     if not os.path.exists(outputs_dir):
         os.makedirs(outputs_dir)
@@ -65,6 +65,9 @@ def main():
     optimizer = optim.Adam(params=model.parameters(), lr=lr)
     # criterion = nn.MSELoss()
     criterion = nn.L1Loss().to(device)
+    l_pix_w = 0.1
+    l_fea_w = 0.8
+    l_d_w = 0.1
 
     # 判别器相关
     if best_d is not None:
@@ -75,7 +78,6 @@ def main():
         netD = nn.DataParallel(netD)
     netD.train()
     cri_gan = GANLoss('ragan', 1.0, 0.0).to(device)
-    l_gan_w = 0.005
     lr_D = 1e-4
     optimizer_D = optim.Adam(params=netD.parameters(), lr=lr_D)
 
@@ -117,16 +119,16 @@ def main():
                 hr_fake = model(lr_img)
                 loss_pix = criterion(hr_fake, hr_img)
                 pix_losses.update(loss_pix.item(), len(hr_img))
-                lossG += 0.01 * loss_pix
+                lossG += l_pix_w * loss_pix
                 real_fea = netPerc(hr_img).detach()
                 fake_fea = netPerc(hr_fake)
                 loss_fea = cri_fea(real_fea, fake_fea)
                 fea_losses.update(loss_fea.item(), len(hr_img))
-                lossG += 1.0 * loss_fea
+                lossG += l_fea_w * loss_fea
 
                 pred_g_fake = netD(hr_fake)
                 pred_d_real = netD(hr_img).detach()
-                l_g_gan = l_gan_w * (cri_gan(pred_d_real - t.mean(pred_g_fake), False) + cri_gan(pred_g_fake - t.mean(pred_d_real), True)) / 2
+                l_g_gan = l_d_w * (cri_gan(pred_d_real - t.mean(pred_g_fake), False) + cri_gan(pred_g_fake - t.mean(pred_d_real), True)) / 2
                 lossG += l_g_gan
 
                 epoch_losses.update(lossG.item(), len(hr_img))

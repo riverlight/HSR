@@ -74,7 +74,7 @@ def config_to_seq(confDict):
         # ----------
         B_jpeg = {
             "mode": "jpeg",
-            "qf": random.randint(30, 95)
+            "qf": random.randint(80, 90)
         }
         degrade_seq.append(B_jpeg)
 
@@ -94,7 +94,7 @@ def config_to_seq(confDict):
     # ---------------
     B_jpeg_last = {
         "mode": "jpeg",
-        "qf": random.randint(40, 95)
+        "qf": random.randint(65, 95)
     }
     degrade_seq.append(B_jpeg_last)
 
@@ -399,8 +399,8 @@ def config_test():
 
 
 if __name__ == "__main__":
-    config_test()
-    exit(0)
+    # config_test()
+    # exit(0)
     test_blur = {
         "mode": "blur",
         "kernel_size": 21,  # random.choice([7, 9, 11, 13, 15, 17, 19, 21]),
@@ -420,7 +420,7 @@ if __name__ == "__main__":
     }
     test_jpeg = {
         "mode": "jpeg",
-        "qf": 30
+        "qf": 90
     }
     test_camera = {
         "mode": "camera",
@@ -435,12 +435,12 @@ if __name__ == "__main__":
     # blur_img = get_blur(img, test_blur)
     # down_img = get_down(blur_img, test_down)
     # noise_img = get_noise(down_img, test_noise)
-    # jpeg_img = get_jpeg(img, test_jpeg)
+    jpeg_img = get_jpeg(img, test_jpeg)
     # camera_img = get_camera(img, test_camera)
     # cv2.imwrite("d:/workroom/testroom/deg.png", camera_img)
     # restore_img = get_restore(down_img, h, w, test_restore)
-    restore_img = degradation_pipeline(img)
-    cv2.imwrite("d:/workroom/testroom/deg.png", restore_img)
+    # restore_img = degradation_pipeline(img)
+    cv2.imwrite("d:/workroom/testroom/deg.png", jpeg_img)
     # cv2.imwrite("./deg.png", camera_img)
 
     # img_list = glob.glob('./tiny_test/*.png')
