@@ -28,14 +28,15 @@ class HRcanIRNet(nn.Module):
             for _ in range(self._n_resgroup)]
         lst_body.append(self._conv(self._n_feat, self._n_feat, self._kernel))
         self._resbody = nn.Sequential(*lst_body)
-        self._tail = common.BasicBlock(self._n_feat, 3, 9, bn=False, act=nn.Tanh(), bias=True)
+        self._tail = common.BasicBlock(self._n_feat, 3, 9, bn=False, act=None, bias=True)
 
     def forward(self, img):
         head_out = self._head(img)
         x = self._resbody(head_out)
         x = self._tail(x)
-        out = x + img
-        return out
+        # out = x + img
+        # return out
+        return x
 
 
 def test_hrcanIR():
