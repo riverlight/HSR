@@ -30,19 +30,20 @@ class CTrain():
             self.use_gpus = True
 
         if self.use_gpus:
-            self.lr = 1e-4
+            self.lr = 4e-4
             self.batch_size = 24*10
             self.num_workers = 8
             self.train_interval = 3
             self.val_interval = 3
             self.camera_flag = False
         else:
-            self.lr = 1e-4
+            self.lr = 4e-4
             self.batch_size = 8
             self.num_workers = 1
             self.train_interval = 7
             self.val_interval = 15
             self.camera_flag = False
+        self.lr_gamma = 0.5
         self.num_epochs = 400
         self.best_weights = None
         self.best_d = None
@@ -112,12 +113,22 @@ class CTrain():
         print(len(self.train_dataset), len(self.eval_dataset))
         # exit(0)
 
+    def adjust_lr(self, epoch):
+        lr = self.lr * (self.lr_gamma ** (epoch // 20))
+        print("adjust lr : epoch[{}] lr : {}".format(epoch, lr))
+        for param_group in self.optimizer.param_groups:
+            param_group['lr']= lr
+        for param_group in self.optimizer_D.param_groups:
+            param_group['lr'] = lr
 
     def train(self):
         best_epoch = 0
         best_psnr = 0.0
         for epoch in range(self.num_epochs - self.start_epoch):
             epoch += self.start_epoch
+            # 动态调整学习率
+            self.adjust_lr(epoch)
+
             if self.use_gpus:
                 self.model.module.train()
             else:
