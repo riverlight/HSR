@@ -33,14 +33,14 @@ class CTrain():
             self.lr = 4e-4
             self.batch_size = 24*10
             self.num_workers = 8
-            self.train_interval = 3
-            self.val_interval = 3
+            self.train_interval = 15
+            self.val_interval = 15
             self.camera_flag = False
         else:
             self.lr = 4e-4
-            self.batch_size = 8
+            self.batch_size = 8*2
             self.num_workers = 1
-            self.train_interval = 7
+            self.train_interval = 15
             self.val_interval = 15
             self.camera_flag = False
         self.lr_gamma = 0.5
@@ -114,7 +114,7 @@ class CTrain():
         # exit(0)
 
     def adjust_lr(self, epoch):
-        lr = self.lr * (self.lr_gamma ** (epoch // 20))
+        lr = self.lr * (self.lr_gamma ** (epoch // 10))
         print("adjust lr : epoch[{}] lr : {}".format(epoch, lr))
         for param_group in self.optimizer.param_groups:
             param_group['lr']= lr
@@ -187,7 +187,7 @@ class CTrain():
 
                     tq.set_postfix(loss='{:.6f}'.format(epoch_losses.avg))
                     tq.update(len(real_img))
-                    print('epoch:', i, epoch_losses.avg, pix_losses.avg, fea_losses.avg, d_losses.avg)
+                    print('epoch:', epoch, i, epoch_losses.avg, pix_losses.avg, fea_losses.avg, d_losses.avg)
 
             if self.use_gpus:
                 t.save(self.model.module, os.path.join(self.outputs_dir, 'qir_epoch_{}.pth'.format(epoch)))
