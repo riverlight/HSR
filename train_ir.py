@@ -31,7 +31,7 @@ class CTrain():
 
         if self.use_gpus:
             self.lr = 4e-4
-            self.batch_size = 24*10
+            self.batch_size = 24*5
             self.num_workers = 8
             self.train_interval = 15
             self.val_interval = 15
