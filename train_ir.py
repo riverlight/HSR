@@ -33,8 +33,8 @@ class CTrain():
             self.lr = 4e-4
             self.batch_size = 8*4
             self.num_workers = 8
-            self.train_interval = 63
-            self.val_interval = 63
+            self.train_interval = 15
+            self.val_interval = 15
         else:
             self.lr = 4e-4
             self.batch_size = 8*2
@@ -66,8 +66,8 @@ class CTrain():
         # criterion = nn.MSELoss()
         self.cri_pix = nn.L1Loss().to(self.device)
         self.l_pix_w = 1
-        self.l_fea_w = 1
-        self.l_d_w = 0.01
+        self.l_fea_w = 0
+        self.l_d_w = 0
 
         self.init_D()
         self.init_dataset()
@@ -115,7 +115,7 @@ class CTrain():
         # exit(0)
 
     def adjust_lr(self, epoch):
-        lr = self.lr * (self.lr_gamma ** (epoch // 10))
+        lr = self.lr * (self.lr_gamma ** (epoch // 20))
         print("adjust lr : epoch[{}] lr : {}".format(epoch, lr))
         for param_group in self.optimizer.param_groups:
             param_group['lr']= lr
