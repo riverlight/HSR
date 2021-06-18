@@ -31,18 +31,16 @@ class CTrain():
 
         if self.use_gpus:
             self.lr = 4e-4
-            self.batch_size = 24*5
+            self.batch_size = 8*4
             self.num_workers = 8
-            self.train_interval = 15
-            self.val_interval = 15
-            self.camera_flag = False
+            self.train_interval = 63
+            self.val_interval = 63
         else:
             self.lr = 4e-4
             self.batch_size = 8*2
             self.num_workers = 1
-            self.train_interval = 15
-            self.val_interval = 15
-            self.camera_flag = False
+            self.train_interval = 63
+            self.val_interval = 63
         self.lr_gamma = 0.5
         self.num_epochs = 400
         self.best_weights = None
@@ -98,8 +96,10 @@ class CTrain():
         self.optimizer_D = optim.Adam(params=self.netD.parameters(), lr=self.lr_D)
 
     def init_dataset(self):
+        self.noise_flag = False
+        self.camera_flag = False
         self.train_dataset = qnDataset('./qn_dataset/vsr_train_hwcbgr.h5', interval=self.train_interval)
-        self.train_dataset.config(scale=1, camera=False)
+        self.train_dataset.config(scale=1, camera=self.camera_flag, noise=self.noise_flag)
         self.train_dataloader = DataLoader(dataset=self.train_dataset,
                                       batch_size=self.batch_size,
                                       shuffle=True,
@@ -107,7 +107,7 @@ class CTrain():
                                       pin_memory=False,
                                       drop_last=True)
         self.eval_dataset = qnDataset('./qn_dataset/vsr_val_hwcbgr.h5', interval=self.val_interval)
-        self.eval_dataset.config(scale=1, camera=self.camera_flag)
+        self.eval_dataset.config(scale=1, camera=self.camera_flag, noise=self.noise_flag)
         self.eval_dataloader = DataLoader(dataset=self.eval_dataset, batch_size=self.batch_size, num_workers=self.num_workers)
         self.trainds_len = len(self.train_dataset)
         print(len(self.train_dataset), len(self.eval_dataset))
