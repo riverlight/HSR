@@ -33,11 +33,11 @@ class HRcanIRNet(nn.Module):
     def forward(self, img):
         head_out = self._head(img)
         res = self._resbody(head_out)
-        res += head_out
+        # res += head_out
         x = self._tail(res)
-        # out = x + img
-        # return out
-        return x
+        out = x + img
+        return out
+        # return x
 
 
 def test_hrcanIR():

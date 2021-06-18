@@ -65,9 +65,9 @@ class CTrain():
         self.optimizer = optim.Adam(params=self.model.parameters(), lr=self.lr)
         # criterion = nn.MSELoss()
         self.cri_pix = nn.L1Loss().to(self.device)
-        self.l_pix_w = 0.88
-        self.l_fea_w = 0.02
-        self.l_d_w = 0.1
+        self.l_pix_w = 1
+        self.l_fea_w = 1
+        self.l_d_w = 0.01
 
         self.init_D()
         self.init_dataset()
@@ -98,8 +98,9 @@ class CTrain():
     def init_dataset(self):
         self.noise_flag = False
         self.camera_flag = False
+        self.jpeg_flag = False
         self.train_dataset = qnDataset('./qn_dataset/vsr_train_hwcbgr.h5', interval=self.train_interval)
-        self.train_dataset.config(scale=1, camera=self.camera_flag, noise=self.noise_flag)
+        self.train_dataset.config(scale=1, camera=self.camera_flag, noise=self.noise_flag, jpeg=self.jpeg_flag)
         self.train_dataloader = DataLoader(dataset=self.train_dataset,
                                       batch_size=self.batch_size,
                                       shuffle=True,
@@ -107,7 +108,7 @@ class CTrain():
                                       pin_memory=False,
                                       drop_last=True)
         self.eval_dataset = qnDataset('./qn_dataset/vsr_val_hwcbgr.h5', interval=self.val_interval)
-        self.eval_dataset.config(scale=1, camera=self.camera_flag, noise=self.noise_flag)
+        self.eval_dataset.config(scale=1, camera=self.camera_flag, noise=self.noise_flag, jpeg=self.jpeg_flag)
         self.eval_dataloader = DataLoader(dataset=self.eval_dataset, batch_size=self.batch_size, num_workers=self.num_workers)
         self.trainds_len = len(self.train_dataset)
         print(len(self.train_dataset), len(self.eval_dataset))
