@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from qn_dataset3 import qnDataset
+from qn_dataset3 import qnDataset2
 from torch.utils.data.dataloader import DataLoader
 from models import HRcanNet
 import os
@@ -104,7 +104,7 @@ class CTrain():
             'camera': False,
             'blur': False
         }
-        self.train_dataset = qnDataset('./qn_dataset/vsr_train_hwcbgr.h5', interval=self.train_interval)
+        self.train_dataset = qnDataset2('./qn_dataset/vsr_train_hwcbgr.h5', interval=self.train_interval)
         self.train_dataset.config(**self.dsConf)
         self.train_dataloader = DataLoader(dataset=self.train_dataset,
                                       batch_size=self.batch_size,
@@ -112,7 +112,7 @@ class CTrain():
                                       num_workers=self.num_workers,
                                       pin_memory=False,
                                       drop_last=True)
-        self.eval_dataset = qnDataset('./qn_dataset/vsr_val_hwcbgr.h5', interval=self.val_interval)
+        self.eval_dataset = qnDataset2('./qn_dataset/vsr_val_hwcbgr.h5', interval=self.val_interval)
         self.eval_dataset.config(**self.dsConf)
         self.eval_dataloader = DataLoader(dataset=self.eval_dataset, batch_size=self.batch_size, num_workers=self.num_workers)
         self.trainds_len = len(self.train_dataset)
