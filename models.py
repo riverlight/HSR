@@ -50,16 +50,22 @@ class HRcanNet(nn.Module):
         lst_body.append(self._conv(self._n_feat, self._n_feat, self._kernel))
         self._resbody = nn.Sequential(*lst_body)
         self._up = common.Upsampler(self._conv, self._scale, self._n_feat, act=False, bias=True, bn=False)
-        self._tail = common.BasicBlock(self._n_feat, 3, 9, bn=False, act=nn.Tanh(), bias=True)
+        self._tail = common.BasicBlock(self._n_feat, 3, 9, bn=False, act=None, bias=True)
 
     def forward(self, lr_img):
-        bic_img = interpolate(lr_img, scale_factor=self._scale, mode="bicubic", align_corners=False)
+        # bic_img = interpolate(lr_img, scale_factor=self._scale, mode="bicubic", align_corners=False)
+        # head_out = self._head(lr_img)
+        # x = self._resbody(head_out)
+        # x = self._up(x)
+        # x = self._tail(x)
+        # hr_img = x + bic_img
+        # return hr_img
         head_out = self._head(lr_img)
-        x = self._resbody(head_out)
-        x = self._up(x)
+        res = self._resbody(head_out)
+        res += head_out
+        x = self._up(res)
         x = self._tail(x)
-        hr_img = x + bic_img
-        return hr_img
+        return x
 
 def test():
     device = 'cuda'

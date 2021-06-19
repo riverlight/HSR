@@ -12,7 +12,7 @@ import os
 import time
 
 
-default_eval_file = "../weights/qir_epoch_27.pth"
+default_eval_file = "../weights/qir_epoch_119.pth"
 
 
 class CIR:
