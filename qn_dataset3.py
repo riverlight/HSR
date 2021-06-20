@@ -107,6 +107,7 @@ class qnDataset2(data.Dataset):
             img_LQ = cv2.resize(img_GT, (H // self.scale, W // self.scale), interpolation=interpolation)
             ret, gt_buf = cv2.imencode(".jpg", img_LQ, [int(cv2.IMWRITE_JPEG_QUALITY), jpg_quality])
             img_Out = cv2.imdecode(gt_buf, cv2.IMREAD_COLOR)
+        img_Out = cv2.resize(img_GT, (H // self.scale, W // self.scale), interpolation=cv2.INTER_CUBIC)
 
         # HWC BGR -> CHW RGB
         img_GT = img_GT[:, :, [2, 1, 0]]
