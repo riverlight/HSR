@@ -16,14 +16,14 @@ def main():
     train_file = "./qn_dataset/train.h5"
     eval_file = "./qn_dataset/eval.h5"
     outputs_dir = "./weights/"
-    lr = 1e-5
+    lr = 1e-4
     batch_size = 24
     num_epochs = 400
     num_workers = 8
     seed = 1108
-    # best_weights = None
-    best_weights = "./weights/hsi_epoch_83.pth"
-    start_epoch = 84
+    best_weights = None
+    # best_weights = "./weights/hsi_epoch_83.pth"
+    start_epoch = 0
 
     if not os.path.exists(outputs_dir):
         os.makedirs(outputs_dir)

@@ -39,8 +39,8 @@ class HRcanNet(nn.Module):
         self._reduction = 16
         self._act = nn.ReLU(True)
         self._res_scale = 1
-        self._n_resblocks = 10
-        self._n_resgroup = 5
+        self._n_resblocks = 20
+        self._n_resgroup = 10
 
         self._head = common.BasicBlock(3, self._n_feat, 5, bias=True, bn=False, act=nn.PReLU())
         lst_body = [
@@ -50,22 +50,22 @@ class HRcanNet(nn.Module):
         lst_body.append(self._conv(self._n_feat, self._n_feat, self._kernel))
         self._resbody = nn.Sequential(*lst_body)
         self._up = common.Upsampler(self._conv, self._scale, self._n_feat, act=False, bias=True, bn=False)
-        self._tail = common.BasicBlock(self._n_feat, 3, 9, bn=False, act=None, bias=True)
+        self._tail = common.BasicBlock(self._n_feat, 3, 9, bn=False, act=nn.Tanh(), bias=True)
 
     def forward(self, lr_img):
-        bic_img = interpolate(lr_img, scale_factor=self._scale, mode="bicubic", align_corners=False)
-        head_out = self._head(lr_img)
-        x = self._resbody(head_out)
-        x = self._up(x)
-        x = self._tail(x)
-        hr_img = x + bic_img
-        return hr_img
+        # bic_img = interpolate(lr_img, scale_factor=self._scale, mode="bicubic", align_corners=False)
         # head_out = self._head(lr_img)
-        # res = self._resbody(head_out)
-        # res += head_out
-        # x = self._up(res)
+        # x = self._resbody(head_out)
+        # x = self._up(x)
         # x = self._tail(x)
-        # return x
+        # hr_img = x + bic_img
+        # return hr_img
+        head_out = self._head(lr_img)
+        res = self._resbody(head_out)
+        res += head_out
+        x = self._up(res)
+        x = self._tail(x)
+        return x
 
 def test():
     device = 'cuda'

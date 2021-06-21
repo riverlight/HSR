@@ -2,6 +2,7 @@
 
 import torch.utils.data as data
 import torch
+from torch.utils.data.dataloader import DataLoader
 from torchvision import transforms
 from PIL import Image
 import glob
@@ -91,23 +92,9 @@ class qnDataset2(data.Dataset):
             [img_GT] = hutils.augment([img_GT], self._config['hflip'], self._config['rotate'])
 
         H, W, C = img_GT.shape
-        jpg_quality = np.random.randint(10, 30)
-        interpolation = [cv2.INTER_CUBIC, cv2.INTER_LINEAR][np.random.randint(0, 2)]
-        order_flag = random.random() < 0.5
-        # print(jpg_quality, interpolation, order_flag)
-        if order_flag:
-            # 先做 jpg 压缩
-            # cv2.imshow("a", img_GT)
-            # cv2.waitKey()
-            ret, gt_buf = cv2.imencode(".jpg", img_GT, [int(cv2.IMWRITE_JPEG_QUALITY), jpg_quality])
-            img_LQ = cv2.imdecode(gt_buf, cv2.IMREAD_COLOR)
-            img_Out = cv2.resize(img_LQ, (H // self.scale, W // self.scale), interpolation=interpolation)
-        else:
-            # 先做缩放
-            img_LQ = cv2.resize(img_GT, (H // self.scale, W // self.scale), interpolation=interpolation)
-            ret, gt_buf = cv2.imencode(".jpg", img_LQ, [int(cv2.IMWRITE_JPEG_QUALITY), jpg_quality])
-            img_Out = cv2.imdecode(gt_buf, cv2.IMREAD_COLOR)
-        img_Out = cv2.resize(img_GT, (H // self.scale, W // self.scale), interpolation=cv2.INTER_CUBIC)
+        img_Out = cv2.resize(img_GT, (H // self.scale, W // self.scale))
+        ret, lr_buf = cv2.imencode(".png", img_Out)
+        img_Out = cv2.imdecode(lr_buf, 1)
 
         # HWC BGR -> CHW RGB
         img_GT = img_GT[:, :, [2, 1, 0]]
@@ -151,6 +138,34 @@ def test():
     print(ds[2]['GT'].shape)
     exit(0)
 
+def calc_ds_psnr():
+    ds = qnDataset2("./qn_dataset/vsr_val_hwcbgr.h5")
+    ds.config(scale=2, noise=True, blur=True, camera=True, jpeg=True)
+    dl = DataLoader(dataset=ds, batch_size=1)
+    lst_bic_psnr = list()
+    for count, data in enumerate(dl):
+        if count%1000 == 0:
+            print("count : ", count)
+            # continue
+        hr_img, lr_img = data['GT'], data['LQ']
+
+        hr_img = hr_img.numpy().astype(np.float32) * 255
+        lr_img = lr_img.numpy().astype(np.float32) * 255
+        hr_img = hr_img.transpose(0, 2, 3, 1)
+        lr_img = lr_img.transpose(0, 2, 3, 1)
+        psnr = h_psnr.calc_psnr_np_upsample(hr_img[0, ...], lr_img[0, ...]).item()
+        if psnr>100:
+            print("count : {}, psnr : {}".format(count, psnr))
+            continue
+        # print(hr_img.shape, lr_img.shape, psnr)
+        lst_bic_psnr.append(psnr)
+        # cv2.imshow("lr", lr.astype(np.uint8))
+        # cv2.imshow('hr', hr_img[0, ...].astype(np.uint8))
+        # cv2.waitKey()
+    print("mean psnr : ", sum(lst_bic_psnr)/len(lst_bic_psnr))
+    print(sum(lst_bic_psnr), len(lst_bic_psnr))
+
 if __name__=="__main__":
-    test()
+    # test()
+    calc_ds_psnr()
 

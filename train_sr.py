@@ -13,6 +13,7 @@ from utils import AverageMeter, calc_psnr
 from HModels.discriminator_vgg_arch import VGGFeatureExtractor, NLayerDiscriminator
 from HModels.loss import GANLoss
 import sys
+from torch.nn.functional import interpolate
 
 if sys.platform != 'win32':
     os.environ['TF_XLA_FLAGS'] = '--tf_xla_enable_xla_devices'
@@ -32,14 +33,14 @@ class CTrain():
 
         if self.use_gpus:
             self.lr = 4e-4
-            self.batch_size = 8*4
+            self.batch_size = 8*8
             self.num_workers = 8
             self.train_interval = 15
             self.val_interval = 15
         else:
             self.lr = 4e-4
-            self.batch_size = 8*2
-            self.num_workers = 1
+            self.batch_size = 8
+            self.num_workers = 2
             self.train_interval = 31
             self.val_interval = 31
         self.lr_gamma = 0.5
@@ -67,7 +68,7 @@ class CTrain():
         # criterion = nn.MSELoss()
         self.cri_pix = nn.L1Loss().to(self.device)
         self.l_pix_w = 1
-        self.l_fea_w = 1
+        self.l_fea_w = 0
         self.l_d_w = 0
 
         self.init_D()
@@ -205,18 +206,19 @@ class CTrain():
                 self.model.eval()
 
             epoch_psnr = AverageMeter()
+            epoch_bic_psnr = AverageMeter()
             for data in self.eval_dataloader:
                 # real_img, ni_img = data
                 real_img, ni_img = data['GT'], data['LQ']
                 real_img = real_img.cuda()
                 ni_img = ni_img.cuda()
-
+                bic_img = interpolate(ni_img, scale_factor=2, mode="bicubic", align_corners=False)
                 with t.no_grad():
                     hsi_img = self.model(ni_img).clamp(0.0, 1.0)
-
                 epoch_psnr.update(calc_psnr(hsi_img, real_img), len(ni_img))
+                epoch_bic_psnr.update(calc_psnr(bic_img, real_img), len(ni_img))
 
-            print(epoch, ', eval psnr: {:.2f}'.format(epoch_psnr.avg))
+            print(epoch, ', eval psnr: {:.2f}, bic psnr : {:.2f}'.format(epoch_psnr.avg, epoch_bic_psnr.avg))
             del real_img, ni_img, hsi_img
             if epoch_psnr.avg > best_psnr:
                 best_epoch = epoch
