@@ -2,7 +2,7 @@
 
 from qn_dataset3 import qnDataset2
 from torch.utils.data.dataloader import DataLoader
-from models import HRcanNet
+from models import HRcanNet, HRRDBNet
 import os
 import torch.optim as optim
 from tqdm import tqdm
@@ -32,7 +32,7 @@ class CTrain():
             self.use_gpus = True
 
         if self.use_gpus:
-            self.lr = 4e-4
+            self.lr = 4e-3
             self.batch_size = 8*8
             self.num_workers = 8
             self.train_interval = 15
@@ -58,7 +58,7 @@ class CTrain():
         if self.best_weights is not None:
             self.model = t.load(self.best_weights)
         else:
-            self.model = HRcanNet().to(self.device)
+            self.model = HRRDBNet().to(self.device)
         if self.use_gpus:
             print("Let's use", t.cuda.device_count(), "GPUs!")
             self.model = nn.DataParallel(self.model)
