@@ -14,6 +14,8 @@ from HModels.discriminator_vgg_arch import VGGFeatureExtractor, NLayerDiscrimina
 from HModels.loss import GANLoss
 import sys
 from torch.nn.functional import interpolate
+from math import sqrt
+
 
 if sys.platform != 'win32':
     os.environ['TF_XLA_FLAGS'] = '--tf_xla_enable_xla_devices'
@@ -32,7 +34,7 @@ class CTrain():
             self.use_gpus = True
 
         if self.use_gpus:
-            self.lr = 4e-3
+            self.lr = 1e-3
             self.batch_size = 8*8
             self.num_workers = 8
             self.train_interval = 15
@@ -43,7 +45,7 @@ class CTrain():
             self.num_workers = 2
             self.train_interval = 31
             self.val_interval = 31
-        self.lr_gamma = 0.5
+        self.lr_gamma = 0.4
         self.num_epochs = 400
         self.best_weights = None
         self.best_d = None
@@ -68,8 +70,8 @@ class CTrain():
         # criterion = nn.MSELoss()
         self.cri_pix = nn.L1Loss().to(self.device)
         self.l_pix_w = 1
-        self.l_fea_w = 0
-        self.l_d_w = 0
+        self.l_fea_w = 0.5
+        self.l_d_w = 0.05
 
         self.init_D()
         self.init_dataset()
@@ -121,7 +123,7 @@ class CTrain():
         # exit(0)
 
     def adjust_lr(self, epoch):
-        lr = self.lr * (self.lr_gamma ** (epoch // 20))
+        lr = self.lr * (self.lr_gamma ** sqrt(epoch // 30))
         print("adjust lr : epoch[{}] lr : {}".format(epoch, lr))
         for param_group in self.optimizer.param_groups:
             param_group['lr']= lr

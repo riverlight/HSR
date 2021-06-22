@@ -138,6 +138,9 @@ def test():
     print(ds[2]['GT'].shape)
     exit(0)
 
+def calc_psnr(img1, img2):
+    return 10. * torch.log10(1. / torch.mean((img1 - img2) ** 2))
+
 def calc_ds_psnr():
     ds = qnDataset2("./qn_dataset/vsr_val_hwcbgr.h5")
     ds.config(scale=2, noise=True, blur=True, camera=True, jpeg=True)
@@ -147,13 +150,19 @@ def calc_ds_psnr():
         if count%1000 == 0:
             print("count : ", count)
             # continue
+        if count>1000:
+            break
         hr_img, lr_img = data['GT'], data['LQ']
 
-        hr_img = hr_img.numpy().astype(np.float32) * 255
-        lr_img = lr_img.numpy().astype(np.float32) * 255
-        hr_img = hr_img.transpose(0, 2, 3, 1)
-        lr_img = lr_img.transpose(0, 2, 3, 1)
-        psnr = h_psnr.calc_psnr_np_upsample(hr_img[0, ...], lr_img[0, ...]).item()
+        from torch.nn.functional import interpolate
+        bic_img = interpolate(lr_img, scale_factor=2, mode="bicubic", align_corners=False)
+        psnr = calc_psnr(hr_img, bic_img)
+
+        # hr_img = hr_img.numpy().astype(np.float32) * 255
+        # lr_img = lr_img.numpy().astype(np.float32) * 255
+        # hr_img = hr_img.transpose(0, 2, 3, 1)
+        # lr_img = lr_img.transpose(0, 2, 3, 1)
+        # psnr = h_psnr.calc_psnr_np_upsample(hr_img[0, ...], lr_img[0, ...]).item()
         if psnr>100:
             print("count : {}, psnr : {}".format(count, psnr))
             continue
