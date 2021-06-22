@@ -75,8 +75,8 @@ class HRRDBNet(nn.Module):
         self._in_nc = 3
         self._out_nc = 3
         self._nf = 32
-        self._rrdb_nb = 5
-        self._gc = 32
+        self._rrdb_nb = 10
+        self._gc = 64
         RRDB_block_f = functools.partial(common.RRDB, nf=self._nf, gc=self._gc)
 
         self.conv_first = nn.Conv2d(self._in_nc, self._nf, 3, 1, 1, bias=True)
