@@ -49,9 +49,9 @@ class CTrain():
         self.num_epochs = 400
         self.best_weights = None
         self.best_d = None
-        # self.best_weights = "./weights/{}_epoch_51.pth".format(self.name)
-        # self.best_d = "./weights/{}_d_51.pth".format(self.name)
-        self.start_epoch = 0
+        self.best_weights = "./weights/{}_epoch_208.pth".format(self.name)
+        self.best_d = "./weights/{}_d_208.pth".format(self.name)
+        self.start_epoch = 119
         self.device = t.device('cuda' if t.cuda.is_available() else 'cpu')
 
         self.cri_fea = nn.L1Loss().to(self.device)
@@ -71,7 +71,7 @@ class CTrain():
         self.cri_pix = nn.L1Loss().to(self.device)
         self.l_pix_w = 1
         self.l_fea_w = 0.5
-        self.l_d_w = 0.03
+        self.l_d_w = 0
 
         self.init_D()
         self.init_dataset()
@@ -123,7 +123,7 @@ class CTrain():
         # exit(0)
 
     def adjust_lr(self, epoch):
-        lr = self.lr * (self.lr_gamma ** sqrt(epoch // 30))
+        lr = self.lr * (self.lr_gamma ** (epoch // 30))
         print("adjust lr : epoch[{}] lr : {}".format(epoch, lr))
         for param_group in self.optimizer.param_groups:
             param_group['lr']= lr
