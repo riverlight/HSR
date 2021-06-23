@@ -49,9 +49,9 @@ class CTrain():
         self.num_epochs = 400
         self.best_weights = None
         self.best_d = None
-        self.best_weights = "./weights/{}_epoch_208.pth".format(self.name)
-        self.best_d = "./weights/{}_d_208.pth".format(self.name)
-        self.start_epoch = 119
+        # self.best_weights = "./weights/{}_epoch_208.pth".format(self.name)
+        # self.best_d = "./weights/{}_d_208.pth".format(self.name)
+        self.start_epoch = 0
         self.device = t.device('cuda' if t.cuda.is_available() else 'cpu')
 
         self.cri_fea = nn.L1Loss().to(self.device)
