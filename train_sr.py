@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from qn_dataset3 import qnDataset2
+from qn_dataset3 import qnDataset2, qnVSRDataset
 from torch.utils.data.dataloader import DataLoader
 from models import HRcanNet, HRRDBNet, HSISRNet
 import os
@@ -26,7 +26,7 @@ def prn_obj(obj):
 
 class CTrain():
     def __init__(self):
-        self.name = "HRRDBNet"
+        self.name = "HSISRNet"
         self.init()
         if sys.platform == "win32":
             self.use_gpus = False
@@ -60,7 +60,7 @@ class CTrain():
         if self.best_weights is not None:
             self.model = t.load(self.best_weights)
         else:
-            self.model = HRRDBNet().to(self.device)
+            self.model = HSISRNet().to(self.device)
         if self.use_gpus:
             print("Let's use", t.cuda.device_count(), "GPUs!")
             self.model = nn.DataParallel(self.model)
@@ -74,7 +74,8 @@ class CTrain():
         self.l_d_w = 0
 
         self.init_D()
-        self.init_dataset()
+        # self.init_dataset()
+        self.init_dataset_vsr()
 
     def init(self):
         self.outputs_dir = "./weights/"
@@ -121,6 +122,21 @@ class CTrain():
         self.trainds_len = len(self.train_dataset)
         print(len(self.train_dataset), len(self.eval_dataset))
         # exit(0)
+
+    def init_dataset_vsr(self):
+        self.train_dataset = qnVSRDataset('./qn_dataset/vsr_dy_train_hwcbgr.h5', interval=self.train_interval)
+        self.train_dataloader = DataLoader(dataset=self.train_dataset,
+                                           batch_size=self.batch_size,
+                                           shuffle=True,
+                                           num_workers=self.num_workers,
+                                           pin_memory=False,
+                                           drop_last=True)
+        self.eval_dataset = qnVSRDataset('./qn_dataset/vsr_dy_val_hwcbgr.h5', interval=self.val_interval)
+        self.eval_dataloader = DataLoader(dataset=self.eval_dataset, batch_size=self.batch_size,
+                                          num_workers=self.num_workers)
+        self.trainds_len = len(self.train_dataset)
+        print(len(self.train_dataset), len(self.eval_dataset))
+
 
     def adjust_lr(self, epoch):
         lr = self.lr * (self.lr_gamma ** (epoch // 30))
