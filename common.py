@@ -60,7 +60,7 @@ class ResBlock(nn.Module):
 
         super(ResBlock, self).__init__()
         m = []
-        for i in range(2):
+        for i in range(10):
             m.append(conv(n_feat, n_feat, kernel_size, bias=bias))
             if bn: m.append(nn.BatchNorm2d(n_feat))
             if i == 0: m.append(act)

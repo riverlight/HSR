@@ -17,7 +17,7 @@ class HSISRNet(nn.Module):
         self._scale = scale
         self._n_feat = 64
         self._head = common.BasicBlock(3, self._n_feat, 9, bias=True, bn=False, act=nn.PReLU())
-        self._resbody = common.ResBlock(self._conv, self._n_feat, 3, bn=False, res_scale=6, act=nn.ReLU(True), bias=False)
+        self._resbody = common.ResBlock(self._conv, self._n_feat, 3, bn=False, res_scale=1, act=nn.ReLU(True), bias=False)
         self._up = common.Upsampler(self._conv, self._scale, self._n_feat, act=nn.PReLU, bias=True, bn=False)
         self._tail = common.BasicBlock(self._n_feat, 3, 9, bn=False, act=nn.Tanh(), bias=True)
 
@@ -93,9 +93,12 @@ class HRRDBNet(nn.Module):
         fea = self.conv_first(x)
         trunk = self.trunk_conv(self.RRDB_trunk(fea))
         fea = fea + trunk
+        # fea = self.trunk_conv(self.RRDB_trunk(fea))
 
         fea = self.lrelu(self.upconv1(F.interpolate(fea, scale_factor=2, mode='nearest')))
         out = self.conv_last(self.lrelu(self.HRconv(fea)))
+        # x_up = F.interpolate(x, scale_factor=2, mode='bicubic')
+        # out = x_up + out
         return out
 
 

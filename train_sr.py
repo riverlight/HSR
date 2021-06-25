@@ -2,7 +2,7 @@
 
 from qn_dataset3 import qnDataset2
 from torch.utils.data.dataloader import DataLoader
-from models import HRcanNet, HRRDBNet
+from models import HRcanNet, HRRDBNet, HSISRNet
 import os
 import torch.optim as optim
 from tqdm import tqdm
@@ -26,7 +26,7 @@ def prn_obj(obj):
 
 class CTrain():
     def __init__(self):
-        self.name = "HSR"
+        self.name = "HRRDBNet"
         self.init()
         if sys.platform == "win32":
             self.use_gpus = False
@@ -43,8 +43,8 @@ class CTrain():
             self.lr = 4e-4
             self.batch_size = 8
             self.num_workers = 2
-            self.train_interval = 31
-            self.val_interval = 31
+            self.train_interval = 63
+            self.val_interval = 63
         self.lr_gamma = 0.5
         self.num_epochs = 400
         self.best_weights = None
@@ -70,8 +70,8 @@ class CTrain():
         # criterion = nn.MSELoss()
         self.cri_pix = nn.L1Loss().to(self.device)
         self.l_pix_w = 1
-        self.l_fea_w = 1
-        self.l_d_w = 0.01
+        self.l_fea_w = 0
+        self.l_d_w = 0
 
         self.init_D()
         self.init_dataset()
