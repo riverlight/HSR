@@ -34,11 +34,11 @@ class CTrain():
             self.use_gpus = True
 
         if self.use_gpus:
-            self.lr = 4e-4
+            self.lr = 1e-3
             self.batch_size = 8*8
             self.num_workers = 8
-            self.train_interval = 15
-            self.val_interval = 15
+            self.train_interval = 0
+            self.val_interval = 0
         else:
             self.lr = 4e-4
             self.batch_size = 8
@@ -175,7 +175,7 @@ class CTrain():
                     # ni_img = ni_img.to(device)
                     real_img = real_img.cuda()
                     ni_img = ni_img.cuda()
-                    hr_fake = self.model(ni_img)
+                    hr_fake = self.model(ni_img).clamp(0.0, 1.0)
                     loss_pix = self.cri_pix(hr_fake, real_img)
                     pix_losses.update(loss_pix.item(), len(real_img))
                     lossG += self.l_pix_w * loss_pix
