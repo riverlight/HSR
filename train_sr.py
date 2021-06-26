@@ -34,13 +34,15 @@ class CTrain():
             self.use_gpus = True
 
         if self.use_gpus:
-            self.lr = 1e-3
+            self.lr = 2e-4
+            self.min_lr = 5e-5
             self.batch_size = 8*8
             self.num_workers = 8
             self.train_interval = 0
             self.val_interval = 0
         else:
             self.lr = 4e-4
+            self.min_lr = 1e-4
             self.batch_size = 8
             self.num_workers = 2
             self.train_interval = 63
@@ -139,7 +141,8 @@ class CTrain():
 
 
     def adjust_lr(self, epoch):
-        lr = self.lr * (self.lr_gamma ** (epoch // 30))
+        lr = self.lr * (self.lr_gamma ** (epoch // 60))
+        lr = lr if lr > self.min_lr else self.min_lr
         print("adjust lr : epoch[{}] lr : {}".format(epoch, lr))
         for param_group in self.optimizer.param_groups:
             param_group['lr']= lr
