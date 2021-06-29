@@ -26,7 +26,7 @@ def prn_obj(obj):
 
 class CTrain():
     def __init__(self):
-        self.name = "vsr_HRRDBNet"
+        self.name = "vsr_HRcanNet"
         self.init()
         if sys.platform == "win32":
             self.use_gpus = False
@@ -72,7 +72,7 @@ class CTrain():
         # criterion = nn.MSELoss()
         self.cri_pix = nn.L1Loss().to(self.device)
         self.l_pix_w = 1
-        self.l_fea_w = 0.5
+        self.l_fea_w = 0
         self.l_d_w = 0
 
         self.init_D()
