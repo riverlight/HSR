@@ -26,7 +26,7 @@ def prn_obj(obj):
 
 class CTrain():
     def __init__(self):
-        self.name = "vsr"
+        self.name = "vsr_HRRDBNet"
         self.init()
         if sys.platform == "win32":
             self.use_gpus = False

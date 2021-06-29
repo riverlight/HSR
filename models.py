@@ -41,8 +41,8 @@ class HRcanNet(nn.Module):
         self._reduction = 16
         self._act = nn.ReLU(True)
         self._res_scale = 1
-        self._n_resblocks = 20
-        self._n_resgroup = 10
+        self._n_resblocks = 3
+        self._n_resgroup = 3
 
         self._head = common.BasicBlock(3, self._n_feat, 5, bias=True, bn=False, act=nn.PReLU())
         lst_body = [
@@ -135,5 +135,5 @@ def test_rrdb():
 if __name__=="__main__":
     print("Hi, this is models test program")
     # test()
-    # test_hrcan()
-    test_rrdb()
+    test_hrcan()
+    # test_rrdb()
