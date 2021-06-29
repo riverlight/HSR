@@ -62,7 +62,7 @@ class CTrain():
         if self.best_weights is not None:
             self.model = t.load(self.best_weights)
         else:
-            self.model = HSISRNet().to(self.device)
+            self.model = HRcanNet().to(self.device)
         if self.use_gpus:
             print("Let's use", t.cuda.device_count(), "GPUs!")
             self.model = nn.DataParallel(self.model)
