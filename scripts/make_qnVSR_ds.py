@@ -47,6 +47,23 @@ def video_2_image():
             cv2.imwrite(os.path.join(HR_image_dir, image_name), hr_frame)
     print('done')
 
+def video_2_png(hr_video, lr_video, hr_png_dir, lr_png_dir):
+    hr_cap = cv2.VideoCapture(hr_video)
+    lr_cap = cv2.VideoCapture(lr_video)
+    count = 0
+    while True:
+        print('count : ', count)
+        ret_lr, lr_frame = lr_cap.read()
+        ret_hr, hr_frame = hr_cap.read()
+        if ret_lr is not True or ret_hr is not True:
+            break
+        image_name = "{:0>4d}.png".format(count)
+        cv2.imwrite(os.path.join(lr_png_dir, image_name), lr_frame)
+        cv2.imwrite(os.path.join(hr_png_dir, image_name), hr_frame)
+        count += 1
+        if count > 100:
+            break
+    print('done')
 
 def make_train_and_val():
     LR_image_dir = "D:\\workroom\\tools\\dataset\\douyin\\LR_image"
@@ -122,4 +139,6 @@ if __name__=="__main__":
     # HRV_2_LRV()
     # video_2_image()
     # make_train_and_val()
-    dir_2_h5()
+    # dir_2_h5()
+    video_2_png('d:/workroom/testroom/jie.mp4', 'd:/workroom/testroom/jie_lr_4.mp4',
+                'd:/workroom/testroom/vsr/hr/jie', 'd:/workroom/testroom/vsr/lr/jie')
