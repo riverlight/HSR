@@ -47,7 +47,7 @@ def make_edvr_png(sdir, target_dir, input_dir):
         print(dstname)
         HR_name = os.path.join(sdir, videoname)
         LR_name = './tmp.mp4'
-        cmd = 'ffmpeg -i {} -vf "scale=iw/4:ih/4" -an -y {}'.format(HR_name, LR_name)
+        cmd = 'ffmpeg -i {} -vf "scale=iw/2:ih/2" -an -y {}'.format(HR_name, LR_name)
         os.system(cmd)
         hr_png_dir = os.path.join(target_dir, dstname)
         lr_png_dir = os.path.join(input_dir, dstname)

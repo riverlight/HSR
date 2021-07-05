@@ -61,7 +61,7 @@ def video_2_png(hr_video, lr_video, hr_png_dir, lr_png_dir):
         cv2.imwrite(os.path.join(lr_png_dir, image_name), lr_frame)
         cv2.imwrite(os.path.join(hr_png_dir, image_name), hr_frame)
         count += 1
-        if count > 100:
+        if count > 10000:
             break
     print('done')
 
@@ -141,4 +141,4 @@ if __name__=="__main__":
     # make_train_and_val()
     # dir_2_h5()
     video_2_png('d:/workroom/testroom/jie.mp4', 'd:/workroom/testroom/jie_lr_4.mp4',
-                'd:/workroom/testroom/vsr/hr/jie', 'd:/workroom/testroom/vsr/lr/jie')
+                'D:/workroom/tools/image/EDVR/datasets/test/target/jie', 'D:/workroom/tools/image/EDVR/datasets/test/input/jie')
