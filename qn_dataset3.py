@@ -92,10 +92,10 @@ class qnDataset2(data.Dataset):
             [img_GT] = hutils.augment([img_GT], self._config['hflip'], self._config['rotate'])
 
         H, W, C = img_GT.shape
-        img_Out = cv2.resize(img_GT, (H // self.scale, W // self.scale))
-        ret, lr_buf = cv2.imencode(".jpg", img_Out, [int(cv2.IMWRITE_JPEG_QUALITY), np.random.randint(10, 95)])
+        img_Out = cv2.resize(img_GT, (H // self.scale, W // self.scale), interpolation=cv2.INTER_CUBIC)
+        # ret, lr_buf = cv2.imencode(".jpg", img_Out, [int(cv2.IMWRITE_JPEG_QUALITY), np.random.randint(10, 95)])
         # ret, lr_buf = cv2.imencode(".png", img_Out)
-        img_Out = cv2.imdecode(lr_buf, 1)
+        # img_Out = cv2.imdecode(lr_buf, 1)
 
         # HWC BGR -> CHW RGB
         img_GT = img_GT[:, :, [2, 1, 0]]

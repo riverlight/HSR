@@ -64,4 +64,11 @@ def make_edvr_png(sdir, target_dir, input_dir):
 
 if __name__=="__main__":
     # make_train_val_txt(sys.argv[1], sys.argv[2])
-    make_edvr_png(sys.argv[1], sys.argv[2], sys.argv[3])
+    video_2_png('d:/workroom/testroom/156.mp4', 'd:/workroom/testroom/156_lr.mp4',
+                'D:/workroom/project/riverlight/egvsr/data/DY_x2/GT', 'D:/workroom/project/riverlight/egvsr/data/DY_x2/Gaussian2xLR')
+    exit(0)
+    if len(sys.argv)!=4:
+        make_edvr_png('d:/workroom/tools/dataset/douyin/HR',
+        'd:/workroom/tools/image/EDVR/datasets/train/target', 'd:/workroom/tools/image/EDVR/datasets/train/input')
+    else:
+        make_edvr_png(sys.argv[1], sys.argv[2], sys.argv[3])

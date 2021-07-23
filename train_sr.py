@@ -34,19 +34,19 @@ class CTrain():
             self.use_gpus = True
 
         if self.use_gpus:
-            self.lr = 2e-4
-            self.min_lr = 5e-5
-            self.batch_size = 8*8
-            self.num_workers = 8
-            self.train_interval = 0
-            self.val_interval = 0
-        else:
             self.lr = 4e-4
-            self.min_lr = 1e-4
+            self.min_lr = 5e-5
             self.batch_size = 8
             self.num_workers = 2
-            self.train_interval = 63
-            self.val_interval = 63
+            self.train_interval = 3
+            self.val_interval = 3
+        else:
+            self.lr = 4e-4
+            self.min_lr = 5e-5
+            self.batch_size = 8
+            self.num_workers = 2
+            self.train_interval = 3
+            self.val_interval = 3
         self.lr_gamma = 0.5
         self.num_epochs = 400
         self.best_weights = None
@@ -72,7 +72,7 @@ class CTrain():
         # criterion = nn.MSELoss()
         self.cri_pix = nn.L1Loss().to(self.device)
         self.l_pix_w = 1
-        self.l_fea_w = 0
+        self.l_fea_w = 0.5
         self.l_d_w = 0
 
         self.init_D()
@@ -141,7 +141,7 @@ class CTrain():
 
 
     def adjust_lr(self, epoch):
-        lr = self.lr * (self.lr_gamma ** (epoch // 60))
+        lr = self.lr * (self.lr_gamma ** (epoch // 30))
         lr = lr if lr > self.min_lr else self.min_lr
         print("adjust lr : epoch[{}] lr : {}".format(epoch, lr))
         for param_group in self.optimizer.param_groups:

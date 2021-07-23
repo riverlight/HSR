@@ -140,5 +140,5 @@ if __name__=="__main__":
     # video_2_image()
     # make_train_and_val()
     # dir_2_h5()
-    video_2_png('d:/workroom/testroom/jie.mp4', 'd:/workroom/testroom/jie_lr_4.mp4',
-                'D:/workroom/tools/image/EDVR/datasets/test/target/jie', 'D:/workroom/tools/image/EDVR/datasets/test/input/jie')
+    video_2_png('d:/workroom/testroom/jie.mp4', 'd:/workroom/testroom/jie_lr_8.mp4',
+                'D:/workroom/tools/image/EDVR/datasets/test/target/jiex8', 'D:/workroom/tools/image/EDVR/datasets/test/input/jiex8')
