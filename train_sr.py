@@ -32,21 +32,22 @@ class CTrain():
             self.use_gpus = False
         else:
             self.use_gpus = True
+        self.use_gpus = False
 
         if self.use_gpus:
             self.lr = 4e-4
             self.min_lr = 5e-5
             self.batch_size = 8
             self.num_workers = 2
-            self.train_interval = 3
-            self.val_interval = 3
+            self.train_interval = 15
+            self.val_interval = 15
         else:
             self.lr = 4e-4
             self.min_lr = 5e-5
             self.batch_size = 8
             self.num_workers = 2
-            self.train_interval = 3
-            self.val_interval = 3
+            self.train_interval = 15
+            self.val_interval = 15
         self.lr_gamma = 0.5
         self.num_epochs = 400
         self.best_weights = None
@@ -76,8 +77,8 @@ class CTrain():
         self.l_d_w = 0
 
         self.init_D()
-        # self.init_dataset()
-        self.init_dataset_vsr()
+        self.init_dataset()
+        # self.init_dataset_vsr()
 
     def init(self):
         self.outputs_dir = "./weights/"
