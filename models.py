@@ -55,19 +55,19 @@ class HRcanNet(nn.Module):
         self._tail = common.BasicBlock(self._n_feat, 3, 9, bn=False, act=nn.Tanh(), bias=True)
 
     def forward(self, lr_img):
-        # bic_img = interpolate(lr_img, scale_factor=self._scale, mode="bicubic", align_corners=False)
-        # head_out = self._head(lr_img)
-        # x = self._resbody(head_out)
-        # x = self._up(x)
-        # x = self._tail(x)
-        # hr_img = x + bic_img
-        # return hr_img
+        bic_img = interpolate(lr_img, scale_factor=self._scale, mode="bicubic", align_corners=False)
         head_out = self._head(lr_img)
-        res = self._resbody(head_out)
-        res += head_out
-        x = self._up(res)
+        x = self._resbody(head_out)
+        x = self._up(x)
         x = self._tail(x)
-        return x
+        hr_img = x + bic_img
+        return hr_img
+        # head_out = self._head(lr_img)
+        # res = self._resbody(head_out)
+        # res += head_out
+        # x = self._up(res)
+        # x = self._tail(x)
+        # return x
 
 class HRRDBNet(nn.Module):
     def __init__(self):

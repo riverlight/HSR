@@ -142,7 +142,7 @@ class CTrain():
 
 
     def adjust_lr(self, epoch):
-        lr = self.lr * (self.lr_gamma ** (epoch // 30))
+        lr = self.lr * (self.lr_gamma ** (epoch // 15))
         lr = lr if lr > self.min_lr else self.min_lr
         print("adjust lr : epoch[{}] lr : {}".format(epoch, lr))
         for param_group in self.optimizer.param_groups:
