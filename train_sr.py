@@ -73,7 +73,7 @@ class CTrain():
         # criterion = nn.MSELoss()
         self.cri_pix = nn.L1Loss().to(self.device)
         self.l_pix_w = 1
-        self.l_fea_w = 0.5
+        self.l_fea_w = 0
         self.l_d_w = 0
 
         self.init_D()
