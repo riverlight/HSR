@@ -53,8 +53,19 @@ class HRcanNet(nn.Module):
         self._resbody = nn.Sequential(*lst_body)
         self._up = common.Upsampler(self._conv, self._scale, self._n_feat, act=False, bias=True, bn=False)
         self._tail = common.BasicBlock(self._n_feat, 3, 9, bn=False, act=nn.Tanh(), bias=True)
+        self._forward = self.forward_scale_1 if self._scale==1 else self.forward_upscale
 
     def forward(self, lr_img):
+        return self._forward(lr_img)
+
+    def forward_scale_1(self, lr_img):
+        head_out = self._head(lr_img)
+        x = self._resbody(head_out)
+        x = self._tail(x)
+        x = x + lr_img
+        return x
+
+    def forward_upscale(self, lr_img):
         bic_img = interpolate(lr_img, scale_factor=self._scale, mode="bicubic", align_corners=False)
         head_out = self._head(lr_img)
         x = self._resbody(head_out)

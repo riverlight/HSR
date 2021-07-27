@@ -26,7 +26,8 @@ def prn_obj(obj):
 
 class CTrain():
     def __init__(self):
-        self.name = "vsr_HRcanNet"
+        self.scale = 1
+        self.name = "dejpeg_HRcanNet"
         self.init()
         if sys.platform == "win32":
             self.use_gpus = False
@@ -63,7 +64,7 @@ class CTrain():
         if self.best_weights is not None:
             self.model = t.load(self.best_weights)
         else:
-            self.model = HRcanNet().to(self.device)
+            self.model = HRcanNet(scale=self.scale).to(self.device)
         if self.use_gpus:
             print("Let's use", t.cuda.device_count(), "GPUs!")
             self.model = nn.DataParallel(self.model)
@@ -105,13 +106,12 @@ class CTrain():
 
     def init_dataset(self):
         self.dsConf = {
-            'scale': 2,
             'noise': False,
-            'jpeg': False,
+            'jpeg': True,
             'camera': False,
             'blur': False
         }
-        self.train_dataset = qnDataset2('./qn_dataset/vsr_train_hwcbgr.h5', interval=self.train_interval)
+        self.train_dataset = qnDataset2('./qn_dataset/vsr_train_hwcbgr.h5', interval=self.train_interval, scale=self.scale)
         self.train_dataset.config(**self.dsConf)
         self.train_dataloader = DataLoader(dataset=self.train_dataset,
                                       batch_size=self.batch_size,
@@ -119,7 +119,7 @@ class CTrain():
                                       num_workers=self.num_workers,
                                       pin_memory=False,
                                       drop_last=True)
-        self.eval_dataset = qnDataset2('./qn_dataset/vsr_val_hwcbgr.h5', interval=self.val_interval)
+        self.eval_dataset = qnDataset2('./qn_dataset/vsr_val_hwcbgr.h5', interval=self.val_interval, scale=self.scale)
         self.eval_dataset.config(**self.dsConf)
         self.eval_dataloader = DataLoader(dataset=self.eval_dataset, batch_size=self.batch_size, num_workers=self.num_workers)
         self.trainds_len = len(self.train_dataset)
@@ -174,7 +174,7 @@ class CTrain():
                     for p in self.netD.parameters():
                         p.requires_grad = False
                     lossG = 0
-                    real_img, ni_img = data['GT'], data['LQ']
+                    real_img, ni_img = data['GT'], data['NI']
                     # real_img = real_img.to(device)
                     # ni_img = ni_img.to(device)
                     real_img = real_img.cuda()
@@ -231,10 +231,13 @@ class CTrain():
             epoch_bic_psnr = AverageMeter()
             for data in self.eval_dataloader:
                 # real_img, ni_img = data
-                real_img, ni_img = data['GT'], data['LQ']
+                real_img, ni_img = data['GT'], data['NI']
                 real_img = real_img.cuda()
                 ni_img = ni_img.cuda()
-                bic_img = interpolate(ni_img, scale_factor=2, mode="bicubic", align_corners=False)
+                if self.scale!=1:
+                    bic_img = interpolate(ni_img, scale_factor=2, mode="bicubic", align_corners=False)
+                else:
+                    bic_img = ni_img
                 with t.no_grad():
                     hsi_img = self.model(ni_img).clamp(0.0, 1.0)
                 epoch_psnr.update(calc_psnr(hsi_img, real_img), len(ni_img))

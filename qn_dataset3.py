@@ -66,12 +66,11 @@ class qnDataset(data.Dataset):
 
 
 class qnDataset2(data.Dataset):
-    def __init__(self, h5file, interval=0):
+    def __init__(self, h5file, interval=0, scale=2):
         super(qnDataset2, self).__init__()
         self.interval = interval
         self.patch_size = 96
         self._config = {
-            'scale' : 2,
             'blur' : True,
             'noise' : True,
             'jpeg' : True,
@@ -79,7 +78,7 @@ class qnDataset2(data.Dataset):
             'rotate' : True,
             'hflip' : True
         }
-        self.scale = 2
+        self.scale = scale
         self.h5_file = h5file
 
     def __getitem__(self, idx):
@@ -92,10 +91,14 @@ class qnDataset2(data.Dataset):
             [img_GT] = hutils.augment([img_GT], self._config['hflip'], self._config['rotate'])
 
         H, W, C = img_GT.shape
-        img_Out = cv2.resize(img_GT, (H // self.scale, W // self.scale))
-        # ret, lr_buf = cv2.imencode(".jpg", img_Out, [int(cv2.IMWRITE_JPEG_QUALITY), np.random.randint(10, 95)])
-        # ret, lr_buf = cv2.imencode(".png", img_Out)
-        # img_Out = cv2.imdecode(lr_buf, 1)
+        if self.scale!=1:
+            img_Out = cv2.resize(img_GT, (H // self.scale, W // self.scale))
+        else:
+            img_Out = np.copy(img_GT)
+        if self._config['jpeg']:
+            ret, lr_buf = cv2.imencode(".jpg", img_Out, [int(cv2.IMWRITE_JPEG_QUALITY), np.random.randint(8, 15)])
+            # ret, lr_buf = cv2.imencode(".png", img_Out)
+            img_Out = cv2.imdecode(lr_buf, 1)
 
         # HWC BGR -> CHW RGB
         img_GT = img_GT[:, :, [2, 1, 0]]
@@ -105,7 +108,7 @@ class qnDataset2(data.Dataset):
         img_Out = torch.from_numpy(
             np.ascontiguousarray(np.transpose(img_Out.astype(np.float32) / 255, (2, 0, 1)))).float()
 
-        return {'LQ' if self._config['scale']!=1 else 'NI' : img_Out, 'GT': img_GT}
+        return {'LQ' if self.scale!=1 else 'NI' : img_Out, 'GT': img_GT}
 
     def __len__(self):
         with h5py.File(self.h5_file, 'r') as f:
