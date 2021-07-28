@@ -26,8 +26,10 @@ def prn_obj(obj):
 
 class CTrain():
     def __init__(self):
-        self.scale = 1
-        self.name = "dejpeg_HRcanNet"
+        model_name = 'HRcanNet'
+        ir_type = "sr"
+        self.scale = 2
+        self.name = "{}_{}".format(ir_type, model_name)
         self.init()
         if sys.platform == "win32":
             self.use_gpus = False

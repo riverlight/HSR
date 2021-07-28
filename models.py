@@ -31,9 +31,9 @@ class HSISRNet(nn.Module):
         hr_img = x + bic_img
         return hr_img
 
-class HRcanNet(nn.Module):
+class HRcanNet1(nn.Module):
     def __init__(self, scale=2):
-        super(HRcanNet, self).__init__()
+        super(HRcanNet1, self).__init__()
         self._conv = common.default_conv
         self._scale = scale
         self._n_feat = 32
@@ -69,9 +69,9 @@ class HRcanNet(nn.Module):
         # x = self._tail(x)
         # return x
 
-class HRcanNet_new(nn.Module):
+class HRcanNet(nn.Module):
     def __init__(self, scale=2):
-        super(HRcanNet_new, self).__init__()
+        super(HRcanNet, self).__init__()
         self._conv = common.default_conv
         self._scale = scale
         self._n_feat = 32
