@@ -12,7 +12,7 @@ import time
 
 
 class CIR:
-    def __init__(self, weights_file="../weights/dejpeg_HRcanNet_epoch_72.pth"):
+    def __init__(self, weights_file="../weights/dejpeg_HRcanNet_epoch_best.pth"):
         self._device = 'cuda'
         # self._net = HSISRNet().to(self._device)
         self._net = t.load(weights_file).to(self._device)
@@ -36,7 +36,7 @@ class CIR:
 
 def main():
     scale = 1
-    s_mp4 = "d:/workroom/testroom/zhuling1.mp4"
+    s_mp4 = "d:/workroom/testroom/fei-enc.mp4"
     cap = cv2.VideoCapture(s_mp4)
     width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH)*scale)
     height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT)*scale)

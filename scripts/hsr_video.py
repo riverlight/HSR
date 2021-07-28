@@ -12,7 +12,7 @@ import time
 
 
 class CSISR:
-    def __init__(self, weights_file="../weights/hsi4_noi_5_10.pth"):
+    def __init__(self, weights_file="../weights/vsr_HRcanNet_best_nofea.pth"):
         self._device = 'cuda'
         # self._net = HSISRNet().to(self._device)
         self._net = t.load(weights_file).to(self._device)
@@ -36,12 +36,12 @@ class CSISR:
 
 def main():
     scale = 2
-    s_mp4 = "d:/workroom/testroom/fei-enc.mp4"
+    s_mp4 = "d:/workroom/testroom/jie_lr.mp4"
     cap = cv2.VideoCapture(s_mp4)
     width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH)*scale)
     height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT)*scale)
     fps = cap.get(cv2.CAP_PROP_FPS)
-    fourcc = cv2.VideoWriter_fourcc(*'MJPG')
+    fourcc = cv2.VideoWriter_fourcc(*'I420')
     out = cv2.VideoWriter(s_mp4.replace('.mp4', '_hsr.avi'), fourcc, fps, (width, height))
     net = CSISR()
 
