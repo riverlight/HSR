@@ -109,7 +109,7 @@ class CTrain():
     def init_dataset(self):
         self.dsConf = {
             'noise': False,
-            'jpeg': True,
+            'jpeg': False,
             'camera': False,
             'blur': False
         }
