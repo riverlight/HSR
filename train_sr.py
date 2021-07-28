@@ -176,7 +176,7 @@ class CTrain():
                     for p in self.netD.parameters():
                         p.requires_grad = False
                     lossG = 0
-                    real_img, ni_img = data['GT'], data['NI']
+                    real_img, ni_img = data['GT'], data['LQ']
                     # real_img = real_img.to(device)
                     # ni_img = ni_img.to(device)
                     real_img = real_img.cuda()
@@ -233,7 +233,7 @@ class CTrain():
             epoch_bic_psnr = AverageMeter()
             for data in self.eval_dataloader:
                 # real_img, ni_img = data
-                real_img, ni_img = data['GT'], data['NI']
+                real_img, ni_img = data['GT'], data['LQ']
                 real_img = real_img.cuda()
                 ni_img = ni_img.cuda()
                 if self.scale!=1:
