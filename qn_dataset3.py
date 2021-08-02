@@ -12,7 +12,7 @@ import random
 import numpy as np
 import h5py
 import h_psnr
-from preprocess.degrade import config_to_seq, degradation_pipeline, print_degrade_seg
+from preprocess.degrade import config_to_seq, degradation_pipeline, print_degrade_seg, get_blur
 
 
 class qnDataset(data.Dataset):
@@ -71,6 +71,7 @@ class qnDataset2(data.Dataset):
         self.interval = interval
         self.patch_size = 96
         self._config = {
+            'scale': scale,
             'blur' : True,
             'noise' : True,
             'jpeg' : True,
@@ -99,6 +100,8 @@ class qnDataset2(data.Dataset):
             ret, lr_buf = cv2.imencode(".jpg", img_Out, [int(cv2.IMWRITE_JPEG_QUALITY), np.random.randint(8, 15)])
             # ret, lr_buf = cv2.imencode(".png", img_Out)
             img_Out = cv2.imdecode(lr_buf, 1)
+        if self._config['blur']:
+            img_Out = get_blur(img_Out)
 
         # HWC BGR -> CHW RGB
         img_GT = img_GT[:, :, [2, 1, 0]]

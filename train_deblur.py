@@ -27,7 +27,7 @@ def prn_obj(obj):
 class CTrain():
     def __init__(self):
         model_name = 'HRcanNet'
-        ir_type = "dejpeg"
+        ir_type = "deblur"
         self.scale = 1
         self.name = "{}_{}".format(ir_type, model_name)
         self.init()
@@ -53,9 +53,9 @@ class CTrain():
             self.val_interval = 15
         self.lr_gamma = 0.5
         self.num_epochs = 400
-        # self.best_weights = None
-        self.best_weights = "./weights/{}_epoch_60.pth".format(self.name)
-        self.start_epoch = 61
+        self.best_weights = None
+        # self.best_weights = "./weights/{}_epoch_60.pth".format(self.name)
+        self.start_epoch = 0
         self.device = t.device('cuda' if t.cuda.is_available() else 'cpu')
 
         self.cri_fea = nn.L1Loss().to(self.device)
@@ -74,7 +74,7 @@ class CTrain():
         # criterion = nn.MSELoss()
         self.cri_pix = nn.L1Loss().to(self.device)
         self.l_pix_w = 1
-        self.l_fea_w = 0
+        self.l_fea_w = 0.5
 
         self.init_dataset()
 
@@ -90,9 +90,9 @@ class CTrain():
     def init_dataset(self):
         self.dsConf = {
             'noise': False,
-            'jpeg': True,
+            'jpeg': False,
             'camera': False,
-            'blur': False
+            'blur': True
         }
         self.train_dataset = qnDataset2('./qn_dataset/vsr_train_hwcbgr.h5', interval=self.train_interval, scale=self.scale)
         self.train_dataset.config(**self.dsConf)
@@ -190,7 +190,8 @@ class CTrain():
                 epoch_psnr.update(calc_psnr(hsi_img, real_img), len(ni_img))
                 epoch_bic_psnr.update(calc_psnr(bic_img, real_img), len(ni_img))
 
-            print(epoch, ', eval psnr: {:.2f}, bic psnr : {:.2f}'.format(epoch_psnr.avg, epoch_bic_psnr.avg))
+            print(epoch, ', eval psnr: {:.2f}, bic psnr : {:.2f}, improve psnr : {:.2f}'.format(epoch_psnr.avg,
+                        epoch_bic_psnr.avg, epoch_bic_psnr.avg - epoch_psnr.avg))
             del real_img, ni_img, hsi_img
             if epoch_psnr.avg > best_psnr:
                 best_epoch = epoch

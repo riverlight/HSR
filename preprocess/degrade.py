@@ -251,7 +251,26 @@ def degradation_pipeline(img, degrade_seq=None):
     return img
 
 
-def get_blur(img, degrade_dict):
+def get_blur(img, degrade_dict=None):
+    if degrade_dict is None:
+        if random.random() < 0.5:
+            B_iso = {
+                "mode": "blur",
+                "kernel_size": random.choice([7, 9, 11, 13, 15, 17, 19, 21]),
+                "is_aniso": False,
+                "sigma": random.uniform(0.1, 2.8),
+            }
+            degrade_dict = B_iso
+        else:
+            B_aniso = {
+                "mode": "blur",
+                "kernel_size": random.choice([7, 9, 11, 13, 15, 17, 19, 21]),
+                "is_aniso": True,
+                "x_sigma": random.uniform(0.5, 8),
+                "y_sigma": random.uniform(0.5, 8),
+                "rotation": random.uniform(0, 180)
+            }
+            degrade_dict = B_aniso
     k_size = degrade_dict["kernel_size"]
     if degrade_dict["is_aniso"]:
         sigma_x = degrade_dict["x_sigma"]
@@ -429,7 +448,9 @@ if __name__ == "__main__":
     }
     img = cv2.imread("d:/workroom/testroom/v0.png")
     # h, w, c = img.shape
-    # blur_img = get_blur(img, test_blur)
+    blur_img = get_blur(img, None)
+    cv2.imwrite("d:/blur.png", blur_img)
+    exit(0)
     # down_img = get_down(blur_img, test_down)
     # noise_img = get_noise(down_img, test_noise)
     jpeg_img = get_jpeg(img, test_jpeg)
