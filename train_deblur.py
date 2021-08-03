@@ -191,7 +191,7 @@ class CTrain():
                 epoch_bic_psnr.update(calc_psnr(bic_img, real_img), len(ni_img))
 
             print(epoch, ', eval psnr: {:.2f}, bic psnr : {:.2f}, improve psnr : {:.2f}'.format(epoch_psnr.avg,
-                        epoch_bic_psnr.avg, epoch_bic_psnr.avg - epoch_psnr.avg))
+                        epoch_bic_psnr.avg, epoch_psnr.avg-epoch_bic_psnr.avg))
             del real_img, ni_img, hsi_img
             if epoch_psnr.avg > best_psnr:
                 best_epoch = epoch
