@@ -101,8 +101,7 @@ class qnDataset2(data.Dataset):
             # ret, lr_buf = cv2.imencode(".png", img_Out)
             img_Out = cv2.imdecode(lr_buf, 1)
         if self._config['blur']:
-            # img_Out = get_blur(img_Out)
-            img_Out = cv2.GaussianBlur(img_Out, (5, 5), 0)
+            img_Out = get_blur(img_Out)
 
         # HWC BGR -> CHW RGB
         img_GT = img_GT[:, :, [2, 1, 0]]
