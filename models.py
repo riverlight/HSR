@@ -8,6 +8,7 @@ import torch as T
 from torchsummary import summary
 import functools
 import torch.nn.functional as F
+import time
 
 
 class HSISRNet(nn.Module):
@@ -113,6 +114,50 @@ class HRcanNet(nn.Module):
         return hr_img
 
 
+class HRcanNet2(nn.Module):
+    def __init__(self, scale=2, resblocks=5, resgroup=5):
+        super(HRcanNet2, self).__init__()
+        self._conv = common.default_conv
+        self._scale = scale
+        self._n_feat = 32
+        self._kernel = 3
+        self._reduction = 16
+        self._act = nn.ReLU(True)
+        self._res_scale = 1
+        self._n_resblocks = resblocks
+        self._n_resgroup = resgroup
+
+        self._head = common.BasicBlock(3, self._n_feat, 5, bias=True, bn=False, act=nn.PReLU())
+        lst_body = [
+            common.ResidualGroup(
+                self._conv, self._n_feat, self._kernel, self._reduction, act=self._act, res_scale=self._res_scale, n_resblocks=self._n_resblocks) \
+            for _ in range(self._n_resgroup)]
+        lst_body.append(self._conv(self._n_feat, self._n_feat, self._kernel))
+        self._resbody = nn.Sequential(*lst_body)
+        self._up = common.Upsampler(self._conv, self._scale, self._n_feat, act=False, bias=True, bn=False)
+        self._tail = common.BasicBlock(self._n_feat, 3, 9, bn=False, act=nn.Tanh(), bias=True)
+        self._forward = self.forward_scale_1 if self._scale==1 else self.forward_upscale
+
+    def forward(self, lr_img):
+        return self._forward(lr_img)
+
+    def forward_scale_1(self, lr_img):
+        head_out = self._head(lr_img)
+        x = self._resbody(head_out)
+        x = self._tail(x)
+        x = x + lr_img
+        return x
+
+    def forward_upscale(self, lr_img):
+        bic_img = interpolate(lr_img, scale_factor=self._scale, mode="bicubic", align_corners=False)
+        head_out = self._head(lr_img)
+        x = self._resbody(head_out)
+        x = self._up(x)
+        x = self._tail(x)
+        hr_img = x + bic_img
+        return hr_img
+
+
 class HRRDBNet(nn.Module):
     def __init__(self):
         super(HRRDBNet, self).__init__()
@@ -158,11 +203,17 @@ def test():
 
 def test_hrcan():
     device = 'cuda'
-    net = HRcanNet().to(device)
-    inputs = T.rand(2, 3, 96, 96).to(device)
-    outputs = net(inputs)
+    net = HRcanNet2(scale=1, resblocks=3, resgroup=3).to(device)
+    net.eval()
+    inputs = T.rand(2, 3, 1280, 720).to(device)
+
+    starttime = time.time()
+    for i in range(10):
+        with T.no_grad():
+            outputs = net(inputs)
+    print("time : ", time.time()-starttime)
     print(outputs.shape)
-    summary(net, input_size=(3, 96, 96), device=device)
+    # summary(net, input_size=(3, 96, 96), device=device)
     T.save(net, "d:/hrcan.pth")
     pass
 

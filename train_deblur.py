@@ -2,7 +2,7 @@
 
 from qn_dataset3 import qnDataset2, qnVSRDataset
 from torch.utils.data.dataloader import DataLoader
-from models import HRcanNet, HRRDBNet, HSISRNet
+from models import HRcanNet, HRRDBNet, HSISRNet, HRcanNet2
 import os
 import torch.optim as optim
 from tqdm import tqdm
@@ -15,6 +15,7 @@ from HModels.loss import GANLoss
 import sys
 from torch.nn.functional import interpolate
 from math import sqrt
+import random
 
 
 if sys.platform != 'win32':
@@ -26,7 +27,7 @@ def prn_obj(obj):
 
 class CTrain():
     def __init__(self):
-        model_name = 'HRcanNet'
+        model_name = 'HRcanNet2_1_33'
         ir_type = "deblur"
         self.scale = 1
         self.name = "{}_{}".format(ir_type, model_name)
@@ -64,7 +65,7 @@ class CTrain():
         if self.best_weights is not None:
             self.model = t.load(self.best_weights)
         else:
-            self.model = HRcanNet(scale=self.scale).to(self.device)
+            self.model = HRcanNet2(scale=self.scale, resblocks=3, resgroup=3).to(self.device)
         if self.use_gpus:
             print("Let's use", t.cuda.device_count(), "GPUs!")
             self.model = nn.DataParallel(self.model)
@@ -84,7 +85,7 @@ class CTrain():
             os.makedirs(self.outputs_dir)
 
         cudnn.benchmark = True
-        seed = 1108
+        seed = random.randint(1, 20000)
         t.manual_seed(seed)
 
     def init_dataset(self):
