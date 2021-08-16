@@ -2,7 +2,7 @@
 
 from qn_dataset3 import qnDataset2, qnVSRDataset
 from torch.utils.data.dataloader import DataLoader
-from models import HRcanNet, HRRDBNet, HSISRNet
+from models import HRcanNet, HRRDBNet, HSISRNet, HRcanNet2
 import os
 import torch.optim as optim
 from tqdm import tqdm
@@ -26,7 +26,7 @@ def prn_obj(obj):
 
 class CTrain():
     def __init__(self):
-        model_name = 'HRcanNet'
+        model_name = 'HRcanNet2_1_33'
         ir_type = "dejpeg"
         self.scale = 1
         self.name = "{}_{}".format(ir_type, model_name)
@@ -53,9 +53,9 @@ class CTrain():
             self.val_interval = 15
         self.lr_gamma = 0.5
         self.num_epochs = 400
-        # self.best_weights = None
-        self.best_weights = "./weights/{}_epoch_60.pth".format(self.name)
-        self.start_epoch = 61
+        self.best_weights = None
+        # self.best_weights = "./weights/{}_epoch_60.pth".format(self.name)
+        self.start_epoch = 0
         self.device = t.device('cuda' if t.cuda.is_available() else 'cpu')
 
         self.cri_fea = nn.L1Loss().to(self.device)
@@ -64,7 +64,7 @@ class CTrain():
         if self.best_weights is not None:
             self.model = t.load(self.best_weights)
         else:
-            self.model = HRcanNet(scale=self.scale).to(self.device)
+            self.model = HRcanNet2(scale=self.scale, resblocks=3, resgroup=3).to(self.device)
         if self.use_gpus:
             print("Let's use", t.cuda.device_count(), "GPUs!")
             self.model = nn.DataParallel(self.model)
