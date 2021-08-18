@@ -127,7 +127,7 @@ class HRcanNet2(nn.Module):
         self._n_resblocks = resblocks
         self._n_resgroup = resgroup
 
-        self._head = common.BasicBlock(3, self._n_feat, 5, bias=True, bn=False, act=nn.PReLU())
+        self._head = common.BasicBlock(3, self._n_feat, 3, bias=True, bn=False, act=nn.PReLU())
         lst_body = [
             common.ResidualGroup(
                 self._conv, self._n_feat, self._kernel, self._reduction, act=self._act, res_scale=self._res_scale, n_resblocks=self._n_resblocks) \
@@ -135,7 +135,7 @@ class HRcanNet2(nn.Module):
         lst_body.append(self._conv(self._n_feat, self._n_feat, self._kernel))
         self._resbody = nn.Sequential(*lst_body)
         self._up = common.Upsampler(self._conv, self._scale, self._n_feat, act=False, bias=True, bn=False)
-        self._tail = common.BasicBlock(self._n_feat, 3, 9, bn=False, act=nn.Tanh(), bias=True)
+        self._tail = common.BasicBlock(self._n_feat, 3, 3, bn=False, act=nn.Tanh(), bias=True)
         self._forward = self.forward_scale_1 if self._scale==1 else self.forward_upscale
 
     def forward(self, lr_img):
@@ -158,14 +158,48 @@ class HRcanNet2(nn.Module):
         return hr_img
 
 
+class HResNet(nn.Module):
+    def __init__(self, scale=2, resblocks=10):
+        super(HResNet, self).__init__()
+        self._conv = common.default_conv
+        self._scale = scale
+        self._n_feat = 32
+        self._head = common.BasicBlock(3, self._n_feat, 3, bias=True, bn=False, act=nn.PReLU())
+        self._resbody = common.ResBlock(self._conv, self._n_feat, 3, bn=False, res_scale=1, act=nn.ReLU(True), bias=False, resblocks=resblocks)
+        self._up = common.Upsampler(self._conv, self._scale, self._n_feat, act=nn.PReLU, bias=True, bn=False)
+        self._tail = common.BasicBlock(self._n_feat, 3, 3, bn=False, act=nn.Tanh(), bias=True)
+        self._forward = self.forward_scale_1 if self._scale == 1 else self.forward_upscale
+
+    def forward(self, lr_img):
+        return self._forward(lr_img)
+
+    def forward_upscale(self, lr_img):
+        bic_img = interpolate(lr_img, scale_factor=self._scale, mode="bicubic", align_corners=False)
+        head_out = self._head(lr_img)
+        x = self._resbody(head_out)
+        # x = x + head_out
+        x = self._up(x)
+        x = self._tail(x)
+        hr_img = x + bic_img
+        return hr_img
+
+    def forward_scale_1(self, lr_img):
+        head_out = self._head(lr_img)
+        x = self._resbody(head_out)
+        x = self._tail(x)
+        x = x + lr_img
+        return x
+
 class HRRDBNet(nn.Module):
-    def __init__(self):
+    def __init__(self, scale=2, rrdb_nb=10):
         super(HRRDBNet, self).__init__()
         self._in_nc = 3
         self._out_nc = 3
         self._nf = 32
-        self._rrdb_nb = 10
+        self._rrdb_nb = rrdb_nb
         self._gc = 64
+        self._scale = scale
+
         RRDB_block_f = functools.partial(common.RRDB, nf=self._nf, gc=self._gc)
 
         self.conv_first = nn.Conv2d(self._in_nc, self._nf, 3, 1, 1, bias=True)
@@ -183,8 +217,8 @@ class HRRDBNet(nn.Module):
         trunk = self.trunk_conv(self.RRDB_trunk(fea))
         fea = fea + trunk
         # fea = self.trunk_conv(self.RRDB_trunk(fea))
-
-        fea = self.lrelu(self.upconv1(F.interpolate(fea, scale_factor=2, mode='nearest')))
+        if self._scale!=1:
+            fea = self.lrelu(self.upconv1(F.interpolate(fea, scale_factor=2, mode='nearest')))
         out = self.conv_last(self.lrelu(self.HRconv(fea)))
         # x_up = F.interpolate(x, scale_factor=2, mode='bicubic')
         # out = x_up + out
@@ -205,10 +239,10 @@ def test_hrcan():
     device = 'cuda'
     net = HRcanNet2(scale=1, resblocks=3, resgroup=3).to(device)
     net.eval()
-    inputs = T.rand(2, 3, 1280, 720).to(device)
 
     starttime = time.time()
     for i in range(10):
+        inputs = T.rand(2, 3, 1280, 720).to(device)
         with T.no_grad():
             outputs = net(inputs)
     print("time : ", time.time()-starttime)
@@ -218,17 +252,42 @@ def test_hrcan():
     pass
 
 
+def test_resnet():
+    device = 'cuda'
+    net = HResNet(scale=1, resblocks=5).to(device)
+    net.eval()
+
+    starttime = time.time()
+    for i in range(10):
+        inputs = T.rand(2, 3, 1280, 720).to(device)
+        with T.no_grad():
+            outputs = net(inputs)
+    print("time : ", time.time()-starttime)
+    print(outputs.shape)
+    # summary(net, input_size=(3, 96, 96), device=device)
+    T.save(net, "d:/hres.pth")
+    pass
+
+
 def test_rrdb():
     device = 'cuda'
-    net = HRRDBNet().to(device)
-    inputs = T.rand(2, 3, 96, 96).to(device)
-    outputs = net(inputs)
+    net = HRRDBNet(scale=1, rrdb_nb=10).to(device)
+    net.eval()
+
+    starttime = time.time()
+    for i in range(10):
+        inputs = T.rand(2, 3, 1280//2, 720).to(device)
+        with T.no_grad():
+            outputs = net(inputs)
+        del inputs, outputs
+    print("time : ", time.time() - starttime)
     print(outputs.shape)
-    summary(net, input_size=(3, 96, 96), device=device)
+    # summary(net, input_size=(3, 96, 96), device=device)
     T.save(net, "d:/hrrdb.pth")
 
 if __name__=="__main__":
     print("Hi, this is models test program")
     # test()
-    test_hrcan()
+    # test_hrcan()
+    test_resnet()
     # test_rrdb()

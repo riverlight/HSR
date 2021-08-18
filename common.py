@@ -56,11 +56,11 @@ class BasicBlock(nn.Sequential):
 class ResBlock(nn.Module):
     def __init__(
         self, conv, n_feat, kernel_size,
-        bias=True, bn=False, act=nn.ReLU(True), res_scale=1):
+        bias=True, bn=False, act=nn.ReLU(True), res_scale=1, resblocks=10):
 
         super(ResBlock, self).__init__()
         m = []
-        for i in range(10):
+        for i in range(resblocks):
             m.append(conv(n_feat, n_feat, kernel_size, bias=bias))
             if bn: m.append(nn.BatchNorm2d(n_feat))
             if i == 0: m.append(act)
