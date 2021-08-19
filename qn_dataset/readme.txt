@@ -17,3 +17,8 @@ http://test-v.oss-cn-shanghai.aliyuncs.com/private/vsr_val_hwcbgr.h5
 vsr_dy_train_hwcbgr.h5 和 vsr_dy_val_hwcbgr.h5：用的是抖音的短视频，格式是 hwcbgr
 http://test-v.oss-cn-shanghai.aliyuncs.com/private/vsr_dy_train_hwcbgr.h5
 http://test-v.oss-cn-shanghai.aliyuncs.com/private/vsr_dy_val_hwcbgr.h5
+
+h264qp45_train_hwcbgr.h5 和 h264qp45_val_hwcbgr.h5 : 由 ntire20 track1 和 人脸数据组成，去掉了几个分辨率奇数的图片
+http://test-v.oss-cn-shanghai.aliyuncs.com/private/h264qp45_train_hwcbgr.h5
+http://test-v.oss-cn-shanghai.aliyuncs.com/private/h264qp45_val_hwcbgr.h5
+

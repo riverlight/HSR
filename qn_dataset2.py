@@ -134,7 +134,6 @@ class qnSRDataset2(data.Dataset):
             return len(f['hr'])
 
 
-
 # 得到 SR 数据集
 class qnSRDataset(data.Dataset):
     # 这个的输入是 HR 和 LR 文件夹，不喜欢它的原因是因为每次 getitem 的时候都要对文件操作，似乎性能比较弱

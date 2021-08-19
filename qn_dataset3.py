@@ -122,6 +122,36 @@ class qnDataset2(data.Dataset):
             self._config[k] = v
         print(self._config)
 
+
+class qnH264Dataset(data.Dataset):
+    def __init__(self, h5file, interval=0):
+        super(qnH264Dataset, self).__init__()
+        self.interval = interval
+        self.patch_size = 96
+        self.h5_file = h5file
+
+    def __getitem__(self, idx):
+        # HWC
+        with h5py.File(self.h5_file, 'r') as f:
+            randint = np.random.randint(0, self.interval + 1)
+            img_GT = f['hr'][idx * (self.interval + 1) + randint]
+            img_NI = f['ni'][idx * (self.interval + 1) + randint]
+
+        # HWC BGR -> CHW RGB
+        img_GT = img_GT[:, :, [2, 1, 0]]
+        img_NI = img_NI[:, :, [2, 1, 0]]
+        img_GT = torch.from_numpy(
+            np.ascontiguousarray(np.transpose(img_GT.astype(np.float32) / 255, (2, 0, 1)))).float()
+        img_NI = torch.from_numpy(
+            np.ascontiguousarray(np.transpose(img_NI.astype(np.float32) / 255, (2, 0, 1)))).float()
+
+        return {'NI' : img_NI, 'GT': img_GT}
+
+    def __len__(self):
+        with h5py.File(self.h5_file, 'r') as f:
+            return len(f['hr']) // (self.interval + 1)
+
+
 class qnVSRDataset(data.Dataset):
     def __init__(self, h5file, interval=0):
         super(qnVSRDataset, self).__init__()
