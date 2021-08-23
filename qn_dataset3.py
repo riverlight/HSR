@@ -124,28 +124,32 @@ class qnDataset2(data.Dataset):
 
 
 class qnH264Dataset(data.Dataset):
-    def __init__(self, h5file, interval=0):
+    def __init__(self, h5file, interval=0, scale=1):
         super(qnH264Dataset, self).__init__()
         self.interval = interval
         self.patch_size = 96
         self.h5_file = h5file
+        self.scale = scale
 
     def __getitem__(self, idx):
         # HWC
         with h5py.File(self.h5_file, 'r') as f:
             randint = np.random.randint(0, self.interval + 1)
             img_GT = f['hr'][idx * (self.interval + 1) + randint]
-            img_NI = f['ni'][idx * (self.interval + 1) + randint]
+            if self.scale==1:
+                img_SRC = f['ni'][idx * (self.interval + 1) + randint]
+            else:
+                img_SRC = f['lr'][idx * (self.interval + 1) + randint]
 
         # HWC BGR -> CHW RGB
         img_GT = img_GT[:, :, [2, 1, 0]]
-        img_NI = img_NI[:, :, [2, 1, 0]]
+        img_SRC = img_SRC[:, :, [2, 1, 0]]
         img_GT = torch.from_numpy(
             np.ascontiguousarray(np.transpose(img_GT.astype(np.float32) / 255, (2, 0, 1)))).float()
-        img_NI = torch.from_numpy(
-            np.ascontiguousarray(np.transpose(img_NI.astype(np.float32) / 255, (2, 0, 1)))).float()
+        img_SRC = torch.from_numpy(
+            np.ascontiguousarray(np.transpose(img_SRC.astype(np.float32) / 255, (2, 0, 1)))).float()
 
-        return {'NI' : img_NI, 'GT': img_GT}
+        return {'NI' if self.scale==1 else 'LQ' : img_SRC, 'GT': img_GT}
 
     def __len__(self):
         with h5py.File(self.h5_file, 'r') as f:

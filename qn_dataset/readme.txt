@@ -22,3 +22,6 @@ h264qp45_train_hwcbgr.h5 和 h264qp45_val_hwcbgr.h5 : 由 ntire20 track1 和 人
 http://test-v.oss-cn-shanghai.aliyuncs.com/private/h264qp45_train_hwcbgr.h5
 http://test-v.oss-cn-shanghai.aliyuncs.com/private/h264qp45_val_hwcbgr.h5
 
+sr_h264_train_hwcbgr.h5 和 sr_h264_val_hwcbgr.h5 ：由 ntire20 track1 和 人脸数据组成，去掉了几个分辨率奇数的图片
+http://test-v.oss-cn-shanghai.aliyuncs.com/private/sr_h264_train_hwcbgr.h5
+http://test-v.oss-cn-shanghai.aliyuncs.com/private/sr_h264_val_hwcbgr.h5

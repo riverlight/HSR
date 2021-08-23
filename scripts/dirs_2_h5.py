@@ -10,7 +10,7 @@ import numpy as np
 patch_size = 96
 stride = patch_size * 2
 
-def main(dir_gt, dir_ni, h5_name, mode):
+def do_scale_1(dir_gt, dir_ni, h5_name, mode):
     print("dir_gt : ", dir_gt)
     print("dir_ni : ", dir_ni)
     print("h5_name : ", h5_name)
@@ -58,6 +58,56 @@ def main(dir_gt, dir_ni, h5_name, mode):
     print('done')
     pass
 
+
+def do_scale_2(dir_gt, dir_lr, h5_name, mode):
+    print("dir_gt : ", dir_gt)
+    print("dir_lr : ", dir_lr)
+    print("h5_name : ", h5_name)
+    print('mode : ', mode.upper())
+    h5_file = h5py.File(h5_name, 'w')
+    hr_patchs = list()
+    lr_patchs = list()
+
+    for count, name in enumerate(os.listdir(dir_gt)):
+        # if count>2:
+        #     break
+        gtname = os.path.join(dir_gt, name)
+        lrname = os.path.join(dir_lr, name)
+        if os.path.isdir(gtname):
+            continue
+        print("id : ", count, gtname, lrname)
+        # BGR HWC
+        hr_img = cv2.imread(gtname, cv2.IMREAD_UNCHANGED)
+        lr_img = cv2.imread(lrname, cv2.IMREAD_UNCHANGED)
+        print(lr_img.shape, hr_img.shape)
+        if mode=='CHWRGB':
+            # BGR HWC to RGB CHW
+            hr_img = hr_img[:, :, [2, 1, 0]].transpose(2, 0, 1)
+            lr_img = lr_img[:, :, [2, 1, 0]].transpose(2, 0, 1)
+            for i in range(0, hr_img.shape[1] - patch_size + 1, stride):
+                for j in range(0, hr_img.shape[2] - patch_size + 1, stride):
+                    hr_np = hr_img[:, i:i + patch_size, j:j + patch_size]
+                    hr_patchs.append(hr_np)
+                    lr_np = lr_img[:, i//2:(i + patch_size)//2, j//2:(j + patch_size)//2]
+                    lr_patchs.append(lr_np)
+        else: # HWCBGR
+            for i in range(0, hr_img.shape[0] - patch_size + 1, stride):
+                for j in range(0, hr_img.shape[1] - patch_size + 1, stride):
+                    hr_np = hr_img[i:i + patch_size, j:j + patch_size, :]
+                    hr_patchs.append(hr_np)
+                    lr_np = lr_img[i//2:(i + patch_size)//2, j//2:(j + patch_size)//2, :]
+                    lr_patchs.append(lr_np)
+
+    print("loop completed...")
+    hr_ds = np.array(hr_patchs, dtype=np.uint8)
+    lr_ds = np.array(lr_patchs, dtype=np.uint8)
+    h5_file.create_dataset('hr', data=hr_ds)
+    h5_file.create_dataset('lr', data=lr_ds)
+    h5_file.close()
+    print('done')
+    pass
+
+
 if __name__=="__main__":
     if len(sys.argv)!=5:
         print("python3 dirs_2_h5.py dir_gt dir_ni h5_name mode")
@@ -68,4 +118,5 @@ if __name__=="__main__":
     if sys.argv[4].lower() not in ['hwcbgr', 'chwrgb']:
         print('mode must be HWCBGR or CHWRGB')
         exit(-2)
-    main(sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4])
+    # do_scale_1(sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4])
+    do_scale_2(sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4])
