@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 
-from qn_dataset3 import qnDataset2, qnVSRDataset
+from qn_dataset3 import qnDataset2, qnVSRDataset, qnH264Dataset
 from torch.utils.data.dataloader import DataLoader
-from models import HRcanNet, HRRDBNet, HSISRNet
+from models import HRcanNet, HRRDBNet, HSISRNet, HRcanNet2
 import os
 import torch.optim as optim
 from tqdm import tqdm
@@ -39,18 +39,18 @@ class CTrain():
 
         if self.use_gpus:
             self.lr = 4e-4
-            self.min_lr = 5e-5
+            self.min_lr = 2e-5
             self.batch_size = 8
             self.num_workers = 2
-            self.train_interval = 15
-            self.val_interval = 15
+            self.train_interval = 3
+            self.val_interval = 3
         else:
             self.lr = 4e-4
-            self.min_lr = 5e-5
+            self.min_lr = 2e-5
             self.batch_size = 8
             self.num_workers = 2
-            self.train_interval = 15
-            self.val_interval = 15
+            self.train_interval = 3
+            self.val_interval = 3
         self.lr_gamma = 0.5
         self.num_epochs = 400
         self.best_weights = None
@@ -66,7 +66,7 @@ class CTrain():
         if self.best_weights is not None:
             self.model = t.load(self.best_weights)
         else:
-            self.model = HRcanNet(scale=self.scale).to(self.device)
+            self.model = HRcanNet2(scale=self.scale, resblocks=3, resgroup=3).to(self.device)
         if self.use_gpus:
             print("Let's use", t.cuda.device_count(), "GPUs!")
             self.model = nn.DataParallel(self.model)
@@ -80,8 +80,9 @@ class CTrain():
         self.l_d_w = 0
 
         self.init_D()
-        self.init_dataset()
+        # self.init_dataset()
         # self.init_dataset_vsr()
+        self.init_dataset_h264()
 
     def init(self):
         self.outputs_dir = "./weights/"
@@ -142,6 +143,19 @@ class CTrain():
         self.trainds_len = len(self.train_dataset)
         print(len(self.train_dataset), len(self.eval_dataset))
 
+    def init_dataset_h264(self):
+        self.train_dataset = qnH264Dataset("./qn_dataset/sr_h264_train_hwcbgr.h5", interval=self.train_interval, scale=self.scale)
+        self.train_dataloader = DataLoader(dataset=self.train_dataset,
+                                           batch_size=self.batch_size,
+                                           shuffle=True,
+                                           num_workers=self.num_workers,
+                                           pin_memory=False,
+                                           drop_last=True)
+        self.eval_dataset = qnH264Dataset("./qn_dataset/sr_h264_val_hwcbgr.h5", interval=self.val_interval, scale=self.scale)
+        self.eval_dataloader = DataLoader(dataset=self.eval_dataset, batch_size=self.batch_size,
+                                          num_workers=self.num_workers)
+        self.trainds_len = len(self.train_dataset)
+        print(len(self.train_dataset), len(self.eval_dataset))
 
     def adjust_lr(self, epoch):
         lr = self.lr * (self.lr_gamma ** (epoch // 15))
