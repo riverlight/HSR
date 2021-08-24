@@ -26,7 +26,7 @@ def prn_obj(obj):
 
 class CTrain():
     def __init__(self):
-        model_name = 'HRcanNet'
+        model_name = 'HRcanNet_33'
         ir_type = "sr"
         self.scale = 2
         self.name = "{}_{}".format(ir_type, model_name)
@@ -80,9 +80,9 @@ class CTrain():
         self.l_d_w = 0
 
         self.init_D()
-        # self.init_dataset()
+        self.init_dataset()
         # self.init_dataset_vsr()
-        self.init_dataset_h264()
+        # self.init_dataset_h264()
 
     def init(self):
         self.outputs_dir = "./weights/"

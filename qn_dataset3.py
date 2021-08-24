@@ -248,6 +248,13 @@ def test_vsrds():
     cv2.imshow("GT", np.transpose(d0['GT'][(2, 1, 0), :, :].numpy(), (1, 2, 0)))
     cv2.waitKey()
 
+def test_h264ds():
+    ds = qnH264Dataset("./qn_dataset/sr_h264_val_hwcbgr.h5", scale=2)
+    d0 = ds[101]
+    cv2.imshow("LQ", np.transpose(d0['LQ'][(2, 1, 0), :, :].numpy(), (1, 2, 0)))
+    cv2.imshow("GT", np.transpose(d0['GT'][(2, 1, 0), :, :].numpy(), (1, 2, 0)))
+    cv2.waitKey()
+
 def calc_vds_psnr():
     ds = qnVSRDataset("./qn_dataset/vsr_dy_val_hwcbgr.h5")
     dl = DataLoader(dataset=ds, batch_size=1)
@@ -284,5 +291,6 @@ if __name__=="__main__":
     # test()
     # calc_ds_psnr()
     # test_vsrds()
-    calc_vds_psnr()
+    # calc_vds_psnr()
+    test_h264ds()
 
