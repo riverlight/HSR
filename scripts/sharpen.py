@@ -9,7 +9,7 @@ def clip(x, min, max):
     return y if y<max else max
 
 def sharpen(img):
-    r = 25
+    r = 201
     threshold = 0
     factor = 0.5
     h, w, c = img.shape
@@ -24,6 +24,15 @@ def sharpen(img):
                     img[i, j, s] = clip(value, 0, 255)
     return img
 
+
+def sharpen2(img):
+    r = 49
+    threshold = 0
+    w = 0.25
+    # blur_img = cv2.GaussianBlur(img, (0, 0), r)
+    blur_img = cv2.blur(img, (r, r))
+    usm = cv2.addWeighted(img, 1.0+w, blur_img, -w, 0)
+    return usm
 
 def test_video():
     scale = 1
@@ -49,18 +58,18 @@ def test_video():
         ts = cap.get(cv2.CAP_PROP_POS_MSEC) / 1000
         print('ts :', ts)
         print("cost time : ", time.time() - starttime)
-        pred_img = sharpen(frame)
+        pred_img = sharpen2(frame)
         out.write(pred_img)
         count += 1
-        if ts > 3:
+        if ts > 30:
             break
     out.release()
     cap.release()
 
 def test_image():
-    imagename = "d:/workroom/testroom/v0.png"
+    imagename = "d:/workroom/testroom/lena.jpg"
     img = cv2.imread(imagename)
-    img = sharpen(img)
+    img = sharpen2(img)
     cv2.imwrite(imagename.replace(".png", "-sp.png").replace(".jpg", "-sp.jpg"), img)
 
 if __name__=="__main__":

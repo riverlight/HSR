@@ -13,6 +13,7 @@ import numpy as np
 import h5py
 import h_psnr
 from preprocess.degrade import config_to_seq, degradation_pipeline, print_degrade_seg, get_blur
+from qn_dataset2 import noiseDataset
 
 
 class qnDataset(data.Dataset):
@@ -66,7 +67,7 @@ class qnDataset(data.Dataset):
 
 
 class qnDataset2(data.Dataset):
-    def __init__(self, h5file, interval=0, scale=2):
+    def __init__(self, h5file, interval=0, scale=2, noisedir=None):
         super(qnDataset2, self).__init__()
         self.interval = interval
         self.patch_size = 96
@@ -81,6 +82,7 @@ class qnDataset2(data.Dataset):
         }
         self.scale = scale
         self.h5_file = h5file
+        self.noises = noiseDataset(noisedir, self.patch_size / self.scale) if noisedir else None
 
     def __getitem__(self, idx):
         # HWC
@@ -111,6 +113,12 @@ class qnDataset2(data.Dataset):
         img_Out = torch.from_numpy(
             np.ascontiguousarray(np.transpose(img_Out.astype(np.float32) / 255, (2, 0, 1)))).float()
 
+        # noise injection
+        if self.noises:
+            # print(len(self.noises))
+            norm_noise, _ = self.noises[np.random.randint(0, len(self.noises))]
+            img_Out = torch.clamp(img_Out + norm_noise, 0, 1)
+
         return {'LQ' if self.scale!=1 else 'NI' : img_Out, 'GT': img_GT}
 
     def __len__(self):
@@ -124,15 +132,16 @@ class qnDataset2(data.Dataset):
 
 
 class qnH264Dataset(data.Dataset):
-    def __init__(self, h5file, interval=0, scale=1):
+    def __init__(self, h5file, interval=0, scale=1, noisedir=None):
         super(qnH264Dataset, self).__init__()
         self.interval = interval
         self.patch_size = 96
         self.h5_file = h5file
         self.scale = scale
+        self.noises = noiseDataset(noisedir, self.patch_size / self.scale) if noisedir else None
 
     def __getitem__(self, idx):
-        # HWC
+        # HWC BGR
         with h5py.File(self.h5_file, 'r') as f:
             randint = np.random.randint(0, self.interval + 1)
             img_GT = f['hr'][idx * (self.interval + 1) + randint]
@@ -148,6 +157,12 @@ class qnH264Dataset(data.Dataset):
             np.ascontiguousarray(np.transpose(img_GT.astype(np.float32) / 255, (2, 0, 1)))).float()
         img_SRC = torch.from_numpy(
             np.ascontiguousarray(np.transpose(img_SRC.astype(np.float32) / 255, (2, 0, 1)))).float()
+
+        # noise injection
+        if self.noises:
+            # print(len(self.noises))
+            norm_noise, _ = self.noises[np.random.randint(0, len(self.noises))]
+            img_SRC = torch.clamp(img_SRC + norm_noise, 0, 1)
 
         return {'NI' if self.scale==1 else 'LQ' : img_SRC, 'GT': img_GT}
 
@@ -249,8 +264,9 @@ def test_vsrds():
     cv2.waitKey()
 
 def test_h264ds():
-    ds = qnH264Dataset("./qn_dataset/sr_h264_val_hwcbgr.h5", scale=2)
-    d0 = ds[101]
+    noisedir = "d:/workroom/tools/image/Real-SR/datasets/DF2K/Corrupted_noise/"
+    ds = qnH264Dataset("./qn_dataset/sr_h264_val_hwcbgr.h5", scale=2, noisedir=noisedir)
+    d0 = ds[3]
     cv2.imshow("LQ", np.transpose(d0['LQ'][(2, 1, 0), :, :].numpy(), (1, 2, 0)))
     cv2.imshow("GT", np.transpose(d0['GT'][(2, 1, 0), :, :].numpy(), (1, 2, 0)))
     cv2.waitKey()

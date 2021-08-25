@@ -26,7 +26,7 @@ def prn_obj(obj):
 
 class CTrain():
     def __init__(self):
-        model_name = 'HRcanNet_33'
+        model_name = 'HRcanNet_33_noise'
         ir_type = "sr"
         self.scale = 2
         self.name = "{}_{}".format(ir_type, model_name)
@@ -42,15 +42,15 @@ class CTrain():
             self.min_lr = 2e-5
             self.batch_size = 8
             self.num_workers = 2
-            self.train_interval = 3
-            self.val_interval = 3
+            self.train_interval = 15
+            self.val_interval = 15
         else:
             self.lr = 4e-4
             self.min_lr = 2e-5
             self.batch_size = 8
             self.num_workers = 2
-            self.train_interval = 3
-            self.val_interval = 3
+            self.train_interval = 15
+            self.val_interval = 15
         self.lr_gamma = 0.5
         self.num_epochs = 400
         self.best_weights = None
@@ -108,13 +108,18 @@ class CTrain():
         self.optimizer_D = optim.Adam(params=self.netD.parameters(), lr=self.lr_D)
 
     def init_dataset(self):
+        if sys.platform=='win32':
+            noisedir = "d:/workroom/tools/image/Real-SR/datasets/DF2K/Corrupted_noise/"
+        else:
+            noisedir = "/home/workroom/project/riverlight/repo/datasets/DF2K/Corrupted_noise/"
+
         self.dsConf = {
             'noise': False,
             'jpeg': False,
             'camera': False,
             'blur': False
         }
-        self.train_dataset = qnDataset2('./qn_dataset/vsr_train_hwcbgr.h5', interval=self.train_interval, scale=self.scale)
+        self.train_dataset = qnDataset2('./qn_dataset/vsr_train_hwcbgr.h5', interval=self.train_interval, scale=self.scale, noisedir=noisedir)
         self.train_dataset.config(**self.dsConf)
         self.train_dataloader = DataLoader(dataset=self.train_dataset,
                                       batch_size=self.batch_size,
@@ -122,7 +127,7 @@ class CTrain():
                                       num_workers=self.num_workers,
                                       pin_memory=False,
                                       drop_last=True)
-        self.eval_dataset = qnDataset2('./qn_dataset/vsr_val_hwcbgr.h5', interval=self.val_interval, scale=self.scale)
+        self.eval_dataset = qnDataset2('./qn_dataset/vsr_val_hwcbgr.h5', interval=self.val_interval, scale=self.scale, noisedir=noisedir)
         self.eval_dataset.config(**self.dsConf)
         self.eval_dataloader = DataLoader(dataset=self.eval_dataset, batch_size=self.batch_size, num_workers=self.num_workers)
         self.trainds_len = len(self.train_dataset)
@@ -144,14 +149,18 @@ class CTrain():
         print(len(self.train_dataset), len(self.eval_dataset))
 
     def init_dataset_h264(self):
-        self.train_dataset = qnH264Dataset("./qn_dataset/sr_h264_train_hwcbgr.h5", interval=self.train_interval, scale=self.scale)
+        if sys.platform=='win32':
+            noisedir = "d:/workroom/tools/image/Real-SR/datasets/DF2K/Corrupted_noise/"
+        else:
+            noisedir = "/home/workroom/project/riverlight/repo/datasets/DF2K/Corrupted_noise/"
+        self.train_dataset = qnH264Dataset("./qn_dataset/sr_h264_train_hwcbgr.h5", interval=self.train_interval, scale=self.scale, noisedir=noisedir)
         self.train_dataloader = DataLoader(dataset=self.train_dataset,
                                            batch_size=self.batch_size,
                                            shuffle=True,
                                            num_workers=self.num_workers,
                                            pin_memory=False,
                                            drop_last=True)
-        self.eval_dataset = qnH264Dataset("./qn_dataset/sr_h264_val_hwcbgr.h5", interval=self.val_interval, scale=self.scale)
+        self.eval_dataset = qnH264Dataset("./qn_dataset/sr_h264_val_hwcbgr.h5", interval=self.val_interval, scale=self.scale, noisedir=noisedir)
         self.eval_dataloader = DataLoader(dataset=self.eval_dataset, batch_size=self.batch_size,
                                           num_workers=self.num_workers)
         self.trainds_len = len(self.train_dataset)
