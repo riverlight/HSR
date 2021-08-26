@@ -39,6 +39,29 @@ class noiseDataset(data.Dataset):
         return len(self.noise_imgs)
 
 
+class noiseDataset2(data.Dataset):
+    """
+        输出是适合opencv的 HWC-BGR
+    """
+    def __init__(self, dataset=None, size=96):
+        super(noiseDataset2, self).__init__()
+
+        base = dataset
+        import os
+        assert os.path.exists(base)
+
+        # self.mat_files = sorted(glob.glob(base + '*.mat'))
+        self.noise_imgs = sorted(glob.glob(base + '*.png'))
+        self.pre_process = transforms.Compose([transforms.RandomCrop(size)])
+
+    def __getitem__(self, index):
+        noise = self.pre_process(Image.open(self.noise_imgs[index]))
+        return np.array(noise)[:,:,(2, 1, 0)]
+
+    def __len__(self):
+        return len(self.noise_imgs)
+
+
 class qnSRDataset3(data.Dataset):
     # 这个输入跟 2 一样，是 h5 文件，然后做下采样和jpg压缩，生成 LR image
     def __init__(self, h5file, interval=0):

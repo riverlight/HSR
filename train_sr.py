@@ -115,7 +115,7 @@ class CTrain():
 
         self.dsConf = {
             'noise': False,
-            'jpeg': False,
+            'jpeg': True,
             'camera': False,
             'blur': False
         }

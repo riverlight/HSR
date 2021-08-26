@@ -13,7 +13,7 @@ import numpy as np
 import h5py
 import h_psnr
 from preprocess.degrade import config_to_seq, degradation_pipeline, print_degrade_seg, get_blur
-from qn_dataset2 import noiseDataset
+from qn_dataset2 import noiseDataset, noiseDataset2
 
 
 class qnDataset(data.Dataset):
@@ -82,7 +82,8 @@ class qnDataset2(data.Dataset):
         }
         self.scale = scale
         self.h5_file = h5file
-        self.noises = noiseDataset(noisedir, self.patch_size / self.scale) if noisedir else None
+        # self.noises = noiseDataset2(noisedir, self.patch_size) if noisedir else None
+        self.noises2 = noiseDataset(noisedir, self.patch_size//self.scale) if noisedir else None
 
     def __getitem__(self, idx):
         # HWC
@@ -93,13 +94,20 @@ class qnDataset2(data.Dataset):
         if self._config['hflip'] or self._config['rotate']:
             [img_GT] = hutils.augment([img_GT], self._config['hflip'], self._config['rotate'])
 
-        H, W, C = img_GT.shape
+        # if self.noises:
+        #     noise_img = self.noises[np.random.randint(0, len(self.noises))]
+        #     img_Out = np.array(img_GT, dtype=float) + np.array(noise_img, dtype=float) - noise_img.mean(axis=(0, 1))
+        #     img_Out = np.array(np.clip(img_Out, 0.0, 255.0), dtype=np.uint8)
+        # else:
+        #     img_Out = np.copy(img_GT)
+        img_Out = np.copy(img_GT)
+
+        H, W, C = img_Out.shape
         if self.scale!=1:
-            img_Out = cv2.resize(img_GT, (H // self.scale, W // self.scale))
-        else:
-            img_Out = np.copy(img_GT)
+            img_Out = cv2.resize(img_Out, (H // self.scale, W // self.scale))
+
         if self._config['jpeg']:
-            ret, lr_buf = cv2.imencode(".jpg", img_Out, [int(cv2.IMWRITE_JPEG_QUALITY), np.random.randint(8, 15)])
+            ret, lr_buf = cv2.imencode(".jpg", img_Out, [int(cv2.IMWRITE_JPEG_QUALITY), np.random.randint(65, 95)])
             # ret, lr_buf = cv2.imencode(".png", img_Out)
             img_Out = cv2.imdecode(lr_buf, 1)
         if self._config['blur']:
@@ -114,10 +122,9 @@ class qnDataset2(data.Dataset):
             np.ascontiguousarray(np.transpose(img_Out.astype(np.float32) / 255, (2, 0, 1)))).float()
 
         # noise injection
-        if self.noises:
-            # print(len(self.noises))
-            norm_noise, _ = self.noises[np.random.randint(0, len(self.noises))]
-            img_Out = torch.clamp(img_Out + norm_noise, 0, 1)
+        if self.noises2:
+            noi, _ = self.noises2[np.random.randint(0, len(self.noises2))]
+            img_Out = torch.clamp(img_Out + noi, 0, 1.0)
 
         return {'LQ' if self.scale!=1 else 'NI' : img_Out, 'GT': img_GT}
 
@@ -200,13 +207,18 @@ class qnVSRDataset(data.Dataset):
             return len(f['hr']) // (self.interval + 1)
 
 def test():
+    noisedir = "d:/workroom/tools/image/Real-SR/datasets/DF2K/Corrupted_noise/"
+    # noisedir = None
     scale = 2
-    ds = qnDataset2("./qn_dataset/vsr_train_hwcbgr.h5")
-    ds.config(scale=scale, noise=True, blur=True, camera=True, jpeg=True)
+    ds = qnDataset2("./qn_dataset/vsr_train_hwcbgr.h5", noisedir=noisedir, scale=scale)
+    ds.config(scale=scale, noise=False, blur=False, camera=False, jpeg=True)
 
-    d0 = ds[0]
+    d0 = ds[110]
+    print(d0.keys())
     if scale==1:
-        cv2.imshow("NI", np.transpose(d0['NI'][(2, 1, 0), :, :].numpy(), (1, 2, 0)))
+        img = np.transpose(d0['NI'][(2, 1, 0), :, :].numpy(), (1, 2, 0))
+        # img = cv2.resize(img, (96*2, 96*2))
+        cv2.imshow("NI", img)
     else:
         cv2.imshow("LQ", np.transpose(d0['LQ'][(2, 1, 0), :, :].numpy(), (1, 2, 0)))
     cv2.imshow("GT", np.transpose(d0['GT'][(2, 1, 0), :, :].numpy(), (1, 2, 0)))
@@ -304,9 +316,9 @@ def calc_vds_psnr():
     print(sum(lst_bic_psnr), len(lst_bic_psnr))
 
 if __name__=="__main__":
-    # test()
+    test()
     # calc_ds_psnr()
     # test_vsrds()
     # calc_vds_psnr()
-    test_h264ds()
+    # test_h264ds()
 
