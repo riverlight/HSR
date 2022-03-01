@@ -12,7 +12,7 @@ import time
 
 
 class CIR:
-    def __init__(self, weights_file="../weights/dejpeg_HRcanNet_epoch_best.pth"):
+    def __init__(self, weights_file="../weights/dejpeg_HRcanNet2_1_33_best.pth"):
         self._device = 'cuda'
         # self._net = HSISRNet().to(self._device)
         self._net = t.load(weights_file).to(self._device)
@@ -34,9 +34,12 @@ class CIR:
 
 
 
-def main():
+def main(s_mp4=None):
     scale = 1
-    s_mp4 = "d:/workroom/testroom/fei-enc.mp4"
+    if s_mp4 is None:
+        s_mp4 = "d:/workroom/testroom/156_45.mp4"
+    if '.mp4' not in s_mp4:
+        raise Exception("input video must be mp4 format")
     cap = cv2.VideoCapture(s_mp4)
     width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH)*scale)
     height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT)*scale)
@@ -80,5 +83,10 @@ if __name__ == "__main__":
     # testjpg()
     # exit(0)
     print("Hi, this is video IR program!")
+    mp4s = ['d:/workroom/testroom/lowquality_video/dm_3_1920x1080.mp4',
+            'd:/workroom/testroom/lowquality_video/dy_1_1920x1080.mp4',
+            'd:/workroom/testroom/lowquality_video/lq_3_1920x1080.mp4']
+    # for mp4 in mp4s:
+    #     main(s_mp4=mp4)
     main()
     print('done')

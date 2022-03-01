@@ -10,7 +10,7 @@ import numpy as np
 import h_psnr
 import os
 
-default_eval_file = "../weights/vsr_HRcanNet_best_nofea.pth"
+default_eval_file = "../weights/sr_HRcanNet_best2.pth"
 
 def eval_np(lr_img, eval_file=None, device='cuda'):
     if eval_file is None:
@@ -63,8 +63,8 @@ def eval_psnr():
     # dir0 = "D:\\workroom\\tools\\dataset\\SR\\Set5\\image_SRF_2\\"
     # dir1 = "D:\\workroom\\tools\\dataset\\SR\\Set5\\image_SRF_2\\"
 
-    name = 'car'
-    format = 'jpg'
+    name = 'film'
+    format = 'png'
     lr_file = dir1 + "{}-lr.{}".format(name, format)
     hr_file = dir0 + '{}.{}'.format(name, format)
     hsi_file = eval_image(lr_file=lr_file)

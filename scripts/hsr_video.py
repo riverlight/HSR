@@ -12,7 +12,7 @@ import time
 
 
 class CSISR:
-    def __init__(self, weights_file="../weights/vsr_HRcanNet_best_nofea.pth"):
+    def __init__(self, weights_file="../weights/sr_HRcanNet_33_best.pth"):
         self._device = 'cuda'
         # self._net = HSISRNet().to(self._device)
         self._net = t.load(weights_file).to(self._device)
@@ -36,7 +36,7 @@ class CSISR:
 
 def main():
     scale = 2
-    s_mp4 = "d:/workroom/testroom/jie_lr.mp4"
+    s_mp4 = "d:/workroom/testroom/jie.mp4"
     cap = cv2.VideoCapture(s_mp4)
     width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH)*scale)
     height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT)*scale)

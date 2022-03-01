@@ -258,7 +258,7 @@ class qnSRDataset(data.Dataset):
 
 
 def testNoise():
-    noiDS = noiseDataset(dataset="D:\\workroom\\tools\\image\\Real-SR\\datasets\DF2K\Corrupted_noise\\", size=10)
+    noiDS = noiseDataset(dataset="D:\\workroom\\tools\\image\\Real-SR\\datasets\\DF2K\\Corrupted_noise\\", size=10)
     print(noiDS.__len__())
     ni, img = noiDS[0]
     print(img.shape)
@@ -335,7 +335,7 @@ if __name__=="__main__":
     # print(m.shape)
     # print(m[1][1][1])
     # exit(0)
-    # testNoise()
+    testNoise()
     # testSRDS()
-    testSRDS2()
+    # testSRDS2()
     # testSRDS3()

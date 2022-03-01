@@ -5,8 +5,11 @@ import torch
 
 def main():
     device = 'cuda'
-    weights_file = "../weights/hsi4_noi_5_10.pth"
+    weights_file = "../weights/BSRGANx2_good.pth"
+    # weights_file = "d:/dejpeg_HRcanNet_best.pth"
     net = torch.load(weights_file)
+    for param in net.parameters():
+        param.requires_grad = False
     net = net.to(device)
     net.eval()
 

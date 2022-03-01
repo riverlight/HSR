@@ -5,6 +5,7 @@ import torch as t
 import sys
 sys.path.append("../")
 from models_ir import HRcanIRNet
+from models import HRcanNet
 import cv2
 import numpy as np
 import h_psnr
@@ -12,7 +13,7 @@ import os
 import time
 
 
-default_eval_file = "../weights/qir_epoch_119.pth"
+default_eval_file = "../weights/deblur_HRcanNet_epoch_104.pth"
 
 
 class CIR:
@@ -101,5 +102,5 @@ def eval_image(imagename):
     return out_file
 
 if __name__=="__main__":
-    # eval_image("d:/workroom/testroom/old.png")
-    eval_video()
+    eval_image("d:/workroom/testroom/a.jpg")
+    # eval_video()
